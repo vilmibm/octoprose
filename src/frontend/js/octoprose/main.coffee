@@ -1,48 +1,79 @@
-Router = Backbone.Router.extend
-    routes:
-        submit: "submit"
-        peruse: "peruse"
-        account: "account"
-    submit: () ->
-    peruse: () ->
-    account: () ->
+do ->
+    log = console.log
+    error = console.error
+    Router = Backbone.Router.extend
+        routes:
+            submit: "submit"
+            peruse: "peruse"
+            account: "account"
+            login: "login"
+            logout: "logout"
+            register: "register"
+        submit: ->
+        peruse: ->
+        account: ->
+        login: ->
+            un = $('#login input[name=name]').val()
+            pw = $('#login input[name=pass]').val()
 
+            $.post({un:un, pw:pw}, '/login')
+                .success(->
+                    log 'logged in'
+                    window.localStorage.setItem 'auth',
+                        JSON.stringify username: un
+                ).error ->
+                    error 'TODO no login'
+        logout: () ->
+            window.localStorage.removeItem 'auth'
+            $.get '/logout'
+            @.navigate '/', trigger:true
+        register: () ->
+            un = $('#register input[name=name]').val()
+            pw = $('#register input[name=pass]').val()
 
-# Perusal-related views
+            $.post({un:un, pw:pw}, '/register')
+                .success(->
+                    log 'logged in'
+                    window.localStorage.setItem 'auth',
+                        JSON.stringify username: un
+                ).error ->
+                    error 'TODO no login'
 
-RecentUploadsView = Backbone.View.extend
-    initialize: () ->
+    # Perusal-related views
 
-HighActivityView = Backbone.View.extend
-    initialize: () ->
+    RecentUploadsView = Backbone.View.extend
+        initialize: () ->
 
-FollowersUploadsView = Backbone.View.extend
-    # ul of followers uploads if any
-    initialize: () ->
+    HighActivityView = Backbone.View.extend
+        initialize: () ->
 
-# Submission views
+    FollowersUploadsView = Backbone.View.extend
+        # ul of followers uploads if any
+        initialize: () ->
 
-EditorView = Backbone.View.extend
-    # textarea
-    initialize: () ->
+    # Submission views
 
-SettingsView = Backbone.View.extend
-    # public, genre, etc
-    initialize: () ->
+    EditorView = Backbone.View.extend
+        # textarea
+        initialize: () ->
 
-# Account views
+    SettingsView = Backbone.View.extend
+        # public, genre, etc
+        initialize: () ->
 
-ProfileView = Backbone.View.extend
-    # form for setting un/etc
-    initialize: () ->
+    # Account views
 
-StatsView = Backbone.View.extend
-    # comments given/accepted/etc
-    initialize: () ->
+    ProfileView = Backbone.View.extend
+        # form for setting un/etc
+        initialize: () ->
 
-ControlsView = Backbone.View.extend
-    # logout / etc
-    initialize: () ->
+    StatsView = Backbone.View.extend
+        # comments given/accepted/etc
+        initialize: () ->
 
-Backbone.history.start(push:false)
-new Router
+    ControlsView = Backbone.View.extend
+        # logout / etc
+        initialize: () ->
+
+    Backbone.history.start(push:false)
+    window._router = new Router
