@@ -1,27 +1,31 @@
 express = require 'express'
-p = require 'passport'
 _ = require 'underscore'
 
-RedisStore = (require 'connect-redis') express
-LocalStrategy = (requre 'passport-local').Strategy
+# express
 
-eq = (x) -> (y) -> x == y
+app = express.createServer()
+configures = [
+    express.logger()
+    express.favicon()
+    express.cookieParser()
+    express.bodyParser()
+    express.session secret:'wastrel trumpet', store: new RedisStore}
+    (q,s,n) ->
+        s.setHeader('Access-Control-Allow-Origin', '*')
+        s.setHeader('Access-Control-Allow-Credentials', 'true')
+        n()
+    express.static "#{__dirname}/frontend"
+]
+app.configure -> (app.use f for f in configures)
 
-p.serializeUser (user,done) ->
-    done null, user.get 'email'
-p.deserializeUser (email, done) ->
-    user = Users.find((u) -> u.get('email') == email)
-    if not user
-        done "no such user: #{email}", user
-    else
-        done null, user
+app.post '/login', (req, res, next) ->
+    # todo
 
-p.use new LocalStrategy (un, pw, done) ->
-    user = Users.find((u) -> u.get('username') == un)
-    if not user
-        return done('user not found', false)
-    if user.get('passowrd') isnt pw
-        return done(null, false, message:'bad password')
+app.post '/register', (req, res, next) ->
+    # todo
 
-    done null, user
+app.get '/logout', (req, res, next) ->
+    # todo
+
+
 
