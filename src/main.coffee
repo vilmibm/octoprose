@@ -1,5 +1,5 @@
 express = require 'express'
-p = require('passport')
+p = require 'passport'
 _ = require 'underscore'
 
 LocalStrategy = require('passport-local').Strategy
@@ -18,10 +18,6 @@ configures = [
     express.cookieParser()
     express.bodyParser()
     express.session secret:'wastrel trumpet', store: new RedisStore}
-    (q,s,n) ->
-        s.setHeader('Access-Control-Allow-Origin', '*')
-        s.setHeader('Access-Control-Allow-Credentials', 'true')
-        n()
     p.initialize()
     p.session()
     express.static "#{__dirname}/frontend"
@@ -37,5 +33,4 @@ app.get '/logout', ensureAuth, (req, res, next) ->
     req.logout()
     res.send(200)
 
-
-
+app.listen 6000, 'new.octoprose.com'
