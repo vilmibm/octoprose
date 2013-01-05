@@ -1,1 +1,3 @@
 *.swp
+src/*.js
+src/frontend/js/octoprose/*.js

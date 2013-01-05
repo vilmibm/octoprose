@@ -1,6 +1,9 @@
+#/usr/bin/env coffee
 express = require 'express'
 p = require 'passport'
 _ = require 'underscore'
+
+{}
 
 LocalStrategy = require('passport-local').Strategy
 RedisStore = require('connect-redis')(express)
@@ -17,7 +20,7 @@ configures = [
     express.favicon()
     express.cookieParser()
     express.bodyParser()
-    express.session secret:'wastrel trumpet', store: new RedisStore}
+    express.session secret:'wastrel trumpet', store: new RedisStore
     p.initialize()
     p.session()
     express.static "#{__dirname}/frontend"
