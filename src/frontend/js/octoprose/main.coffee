@@ -1,79 +1,103 @@
-do ->
+define ['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], ($, _, Backbone) ->
     log = console.log
     error = console.error
     Router = Backbone.Router.extend
+        initialize: ->
+            @route /^\/?$/, 'default', @default
         routes:
-            submit: "submit"
-            peruse: "peruse"
-            account: "account"
-            login: "login"
-            logout: "logout"
-            register: "register"
+            submit: 'submit'
+            peruse: 'peruse'
+            account: 'account'
+            logout: 'logout'
+        default: ->
+            console.log 'hello'
+            authView = new AuthView(el:$('#auth'))
+            $('#leftbar').empty().append(authView.$el)
+            authView.render()
+            # this should be automatic. fucker.
+            authView.delegateEvents(authView.events)
         submit: ->
         peruse: ->
         account: ->
-        login: ->
-            un = $('#login input[name=name]').val()
-            pw = $('#login input[name=pass]').val()
+        logout: ->
 
-            $.post({un:un, pw:pw}, '/login')
-                .success(->
-                    log 'logged in'
-                    window.localStorage.setItem 'auth',
-                        JSON.stringify username: un
-                ).error ->
-                    error 'TODO no login'
-        logout: () ->
-            window.localStorage.removeItem 'auth'
-            $.get '/logout'
-            @.navigate '/', trigger:true
-        register: () ->
-            un = $('#register input[name=name]').val()
-            pw = $('#register input[name=pass]').val()
+    f2o = (f) ->
+        data = {}
+        $(f).find('input').each ->
+            data[@name] = $(@).val()
+        data
 
-            $.post({un:un, pw:pw}, '/register')
-                .success(->
-                    log 'logged in'
-                    window.localStorage.setItem 'auth',
-                        JSON.stringify username: un
-                ).error ->
-                    error 'TODO no login'
+    AuthView = Backbone.View.extend
+        events:
+            'submit #login': 'login',
+            'submit #signup': 'signup',
+        login: (e) ->
+            e.preventDefault()
+            data = f2o e.target
+            $.post('/login', data)
+            .success(->
+                console.log('yup')
+                # TODO
+            )
+            .error(->
+                console.log('nope')
+                # TODO
+            )
+        signup: (e) ->
+            e.preventDefault()
+            data = f2o e.target
+            $.post('/signup', data)
+            .success(->
+                console.log('yup')
+                # TODO
+            )
+            .error(->
+                console.log('nope')
+                # TODO
+            )
+        render: ->
+            @.$el.show()
+            @
 
-    # Perusal-related views
+    return {
+        init: ->
+            router = new Router
+            Backbone.history.start(pushState:false)
+    }
 
-    RecentUploadsView = Backbone.View.extend
-        initialize: () ->
 
-    HighActivityView = Backbone.View.extend
-        initialize: () ->
-
-    FollowersUploadsView = Backbone.View.extend
-        # ul of followers uploads if any
-        initialize: () ->
-
-    # Submission views
-
-    EditorView = Backbone.View.extend
-        # textarea
-        initialize: () ->
-
-    SettingsView = Backbone.View.extend
-        # public, genre, etc
-        initialize: () ->
-
-    # Account views
-
-    ProfileView = Backbone.View.extend
-        # form for setting un/etc
-        initialize: () ->
-
-    StatsView = Backbone.View.extend
-        # comments given/accepted/etc
-        initialize: () ->
-
-    ControlsView = Backbone.View.extend
-        # logout / etc
-        initialize: () ->
-
-    Backbone.history.start(push:false)
-    window._router = new Router
+## Perusal-related views
+#
+#RecentUploadsView = Backbone.View.extend
+#    initialize: () ->
+#
+#HighActivityView = Backbone.View.extend
+#    initialize: () ->
+#
+#FollowersUploadsView = Backbone.View.extend
+#    # ul of followers uploads if any
+#    initialize: () ->
+#
+## Submission views
+#
+#EditorView = Backbone.View.extend
+#    # textarea
+#    initialize: () ->
+#
+#SettingsView = Backbone.View.extend
+#    # public, genre, etc
+#    initialize: () ->
+#
+## Account views
+#
+#ProfileView = Backbone.View.extend
+#    # form for setting un/etc
+#    initialize: () ->
+#
+#StatsView = Backbone.View.extend
+#    # comments given/accepted/etc
+#    initialize: () ->
+#
+#ControlsView = Backbone.View.extend
+#    # logout / etc
+#    initialize: () ->

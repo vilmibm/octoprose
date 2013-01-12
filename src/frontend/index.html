@@ -9,8 +9,9 @@
 <body>
     <script src="jam/require.js"></script>
     <script>
-        require(['jquery', 'underscore', 'backbone'], function($, _, Backbone) {
-            require(['js/bootstrap/bootstrap.js', 'js/octoprose/main.js'], function() {
+        require(['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], function($, _, Backbone) {
+            require(['js/octoprose/main.js'], function(octoprose) {
+                octoprose.init();
             });
         });
     </script>
@@ -34,22 +35,24 @@
         </div> <!-- /.navbar -->
         <div class="row-fluid">
             <div id="leftbar" class="span3">
-                <p class="muted">log in</p>
-                <form class="form" method="POST" action="/login">
-                    <input name="email" placeholder="email" type="email" required="true"/><br />
-                    <input type="password" placeholder="password" name="password" required="true"/><br />
-                    <button class="btn-mini" type="submit">log in</button>
-                </form>
-                <p class="muted">...or sign up (it's free)</p>
-                <form class="form" method="POST" action="/signup">
-                    <input  type="email" name="email" placeholder="email" required="true"/>
-                    <input  type="password" name="password" placeholder="password" required="true"/>
-                    <input type="text" name="captcha" placeholder="3 + 3 - 2?" required="true" />
-                    <p>
-                        <sub class="muted">(by signing up you agree to our <a href="#/terms">terms</a>)</sub>
-                    </p>
-                    <button class="btn-mini" type="submit">sign up</button>
-                </form>
+                <div id="auth" style="display:none">
+                    <p class="muted">log in</p>
+                    <form class="form" id="login" method="GET" action="#">
+                        <input name="username" placeholder="email" type="email" required="true"/><br />
+                        <input type="password" placeholder="password" name="password" required="true"/><br />
+                        <button class="btn-mini" type="submit">log in</button>
+                    </form>
+                    <p class="muted">...or sign up (it's free)</p>
+                    <form class="form" id="signup" method="GET" action="#">
+                        <input  type="email" name="email" placeholder="email" required="true"/>
+                        <input  type="password" name="password" placeholder="password" required="true"/>
+                        <input type="text" name="captcha" placeholder="3 + 3 - 2?" required="true" />
+                        <p>
+                            <sub class="muted">(by signing up you agree to our <a href="#/terms">terms</a>)</sub>
+                        </p>
+                        <button class="btn-mini" type="submit">sign up</button>
+                    </form>
+                </div> <!-- #auth -->
             </div> <!-- /.span3 -->
             <div id="center" class="span6">
                 <h1>octoprose</h1>

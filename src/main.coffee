@@ -68,9 +68,9 @@ app.get '/', (req, res, next) -> res.rend 'index.html'
 
 # auth
 app.post '/login', p.authenticate('local', {}), (q,s,n) ->
-    res.send 200
+    s.send 200
 
-app.post '/register', (req, res, next) ->
+app.post '/signup', (req, res, next) ->
     fields = ['email', 'password']
 
     captcha = req.body.captcha
