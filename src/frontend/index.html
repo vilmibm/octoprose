@@ -33,16 +33,19 @@
         <div class="row-fluid">
             <div id="leftbar" class="span3">
                 <p class="muted">log in</p>
-                <form class="form">
-                    <input class="input" type="text" /><br />
-                    <input class="input" type="password" /><br />
+                <form class="form" method="POST" action="/login">
+                    <input name="email" placeholder="email" type="email" required="true"/><br />
+                    <input type="password" placeholder="password" name="password" required="true"/><br />
                     <button class="btn-mini" type="submit">log in</button>
                 </form>
                 <p class="muted">...or sign up (it's free)</p>
-                <form class="form">
-                    <input  type="text" />
-                    <input  type="password" />
-                    <label><input type="checkbox" /> <a href="#/terms/">terms</a></label>
+                <form class="form" method="POST" action="/signup">
+                    <input  type="email" name="email" placeholder="email" required="true"/>
+                    <input  type="password" name="password" placeholder="password" required="true"/>
+                    <input type="text" name="captcha" placeholder="3 + 3 - 2?" required="true" />
+                    <p>
+                        <sub class="muted">(by signing up you agree to our <a href="#/terms">terms</a>)</sub>
+                    </p>
                     <button class="btn-mini" type="submit">sign up</button>
                 </form>
             </div> <!-- /.span3 -->
