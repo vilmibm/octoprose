@@ -94,5 +94,5 @@ app.get '/logout', ensureAuth, (req, res, next) ->
     req.logout()
     res.send(200)
 
-app.listen 3000, domain
+app.listen 3100, domain
 console.log 'listening'
