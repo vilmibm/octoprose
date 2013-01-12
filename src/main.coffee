@@ -45,7 +45,7 @@ p.use new LocalStrategy (em, pw, done) -> # TODO
 
 ensureAuth = (q,s,n) ->
     if q.isAuthenticated() then n() else n 403
-app = express.createServer()
+app = express()
 configures = [
     express.logger()
     express.favicon()
@@ -94,4 +94,5 @@ app.get '/logout', ensureAuth, (req, res, next) ->
     req.logout()
     res.send(200)
 
-app.listen 6000, domain
+app.listen 3000, domain
+console.log 'listening'

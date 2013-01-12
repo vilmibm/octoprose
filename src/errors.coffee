@@ -3,7 +3,9 @@ Error = (msg, type) ->
     @.type = type or 'error'
     @.code = 500
     return @
-Error::finish = (res) -> res.send({msg:@.msg, type:@.type}, @.code)
+Error::finish = (res) ->
+    console.error @.type, @.msg
+    res.send({msg:@.msg, type:@.type}, @.code)
 
 NotFoundError = (identifier) ->
     @.type = 'not_found'
