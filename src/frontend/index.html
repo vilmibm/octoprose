@@ -7,17 +7,19 @@
     <link href="css/bootstrap/bootstrap-responsive.css" rel="stylesheet">
 </head>
 <body>
-    <script src="js/zepto/zepto.js"></script>
-    <script src="js/underscore/underscore.js"></script>
-    <script src="js/backbone/backbone.js"></script>
-    <script src="js/bootstrap/bootstrap.js"></script>
-    <script src="js/octoprose/main.js"></script>
+    <script src="jam/require.js"></script>
     <script>
-        var auth = window.localStorage.getItem('auth');
-        if (auth) {
-            window._user = JSON.parse(auth);
-            window._router.navigate('/account', {trigger:true});
-        }
+        require(['jquery', 'underscore', 'backbone'], function($, _, Backbone) {
+            require(['js/bootstrap/bootstrap.js', 'js/octoprose/main.js'], function() {
+            });
+        });
+    </script>
+    <script>
+    //    var auth = window.localStorage.getItem('auth');
+    //    if (auth) {
+    //        window._user = JSON.parse(auth);
+    //        window._router.navigate('/account', {trigger:true});
+    //    }
     </script>
     <div class="container-fluid">
         <div class="navbar">
