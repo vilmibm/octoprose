@@ -10,15 +10,32 @@ define ['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], ($, _,
             account: 'account'
             logout: 'logout'
         default: ->
-            console.log 'hello'
-            authView = new AuthView(el:$('#auth'))
-            $('#leftbar').empty().append(authView.$el)
-            authView.render()
+            @authView = new AuthView(el:$('#auth'))
+            # eventually:
+            #$('#leftbar','#center','#rightbar').empty()
+            $('#leftbar')
+                .empty()
+                .show()
+                .append(@authView.$el)
+            @authView.render()
             # this should be automatic. fucker.
-            authView.delegateEvents(authView.events)
+            @authView.delegateEvents(@authView.events)
+            @authView.on 'login', =>
+                @navigate 'submit', trigger:true
+            @authView.on 'signup', =>
+                @navigate 'account', trigger:true
         submit: ->
+            $('#leftbar, #center, #rightbar').empty()
+            $('#leftbar').hide()
+
+            @editorView = new EditorView(el:$('#editor'))
+            $('#center').append @editorView.$el
+            @editorView.render()
+            @editorView.delegateEvents @editorView.events
+            $('#rightbar').text('SETTINGS')
         peruse: ->
         account: ->
+            console.log 'account'
         logout: ->
 
     f2o = (f) ->
@@ -26,6 +43,16 @@ define ['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], ($, _,
         $(f).find('input').each ->
             data[@name] = $(@).val()
         data
+
+    EditorView = Backbone.View.extend
+        events:
+            'submit form': 'save'
+        save: (e) ->
+            e.preventDefault()
+            console.log 'save'
+        render: ->
+            @.$el.show()
+            @
 
     AuthView = Backbone.View.extend
         events:
@@ -35,11 +62,8 @@ define ['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], ($, _,
             e.preventDefault()
             data = f2o e.target
             $.post('/login', data)
-            .success(->
-                console.log('yup')
-                # TODO
-            )
-            .error(->
+            .success(=> @trigger 'login')
+            .error(=>
                 console.log('nope')
                 # TODO
             )
@@ -47,11 +71,8 @@ define ['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], ($, _,
             e.preventDefault()
             data = f2o e.target
             $.post('/signup', data)
-            .success(->
-                console.log('yup')
-                # TODO
-            )
-            .error(->
+            .success(=> @trigger 'signup')
+            .error(=>
                 console.log('nope')
                 # TODO
             )
