@@ -6,6 +6,11 @@ var jam = {
             "main": "backbone.js"
         },
         {
+            "name": "backbone-rel",
+            "location": "jam/backbone-rel",
+            "main": "backbone-relational.js"
+        },
+        {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
@@ -30,6 +35,11 @@ var jam = {
             ],
             "exports": "Backbone"
         },
+        "backbone-rel": {
+            "deps": [
+                "backbone"
+            ]
+        },
         "underscore": {
             "exports": "_"
         }
@@ -43,6 +53,11 @@ if (typeof require !== "undefined" && require.config) {
             "name": "backbone",
             "location": "jam/backbone",
             "main": "backbone.js"
+        },
+        {
+            "name": "backbone-rel",
+            "location": "jam/backbone-rel",
+            "main": "backbone-relational.js"
         },
         {
             "name": "underscore",
@@ -67,6 +82,11 @@ if (typeof require !== "undefined" && require.config) {
                 "underscore"
             ],
             "exports": "Backbone"
+        },
+        "backbone-rel": {
+            "deps": [
+                "backbone"
+            ]
         },
         "underscore": {
             "exports": "_"
@@ -83,6 +103,11 @@ else {
             "main": "backbone.js"
         },
         {
+            "name": "backbone-rel",
+            "location": "jam/backbone-rel",
+            "main": "backbone-relational.js"
+        },
+        {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
@@ -105,6 +130,11 @@ else {
                 "underscore"
             ],
             "exports": "Backbone"
+        },
+        "backbone-rel": {
+            "deps": [
+                "backbone"
+            ]
         },
         "underscore": {
             "exports": "_"

@@ -1,4 +1,4 @@
-define ['jquery', 'underscore', 'backbone', 'cookie', 'js/bootstrap/bootstrap.js'], ($, _, Backbone, cookie) ->
+define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootstrap/bootstrap.js'], ($, _, Backbone, cookie) ->
     log = console.log
     error = console.error
     authed = -> cookie.get 'octoauth'

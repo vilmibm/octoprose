@@ -1,0 +1,27 @@
+{
+  "name"          : "backbone-rel",
+  "description"   : "Get and set relations (one-to-one, one-to-many, many-to-one) for Backbone models",
+  "keywords"      : ["Backbone", "relation", "nested", "model"],
+  "author"        : "Paul Uithol <https://github.com/PaulUithol>",
+  "contributors"  : "Listed at <https://github.com/PaulUithol/Backbone-relational/contributors>",
+  "repositories": [{
+      "type":"git",
+      "url": "https://github.com/PaulUithol/Backbone-relational.git"
+  }],
+  "jam": {
+    "dependencies": {
+      "jquery": ">1.4.3",
+      "underscore": ">0.9.10"
+    },
+    "main": "backbone-relational.js",
+    "shim": {
+        "deps": ["backbone"]
+    },
+    "include": [
+      "backbone-relational.js",
+      "README.md"
+    ]
+  },
+  "main"          : "backbone-relational.js",
+  "version"       : "0.7.1"
+}
