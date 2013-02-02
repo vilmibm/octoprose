@@ -84,9 +84,16 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
             'submit form': 'save'
         save: (e) ->
             e.preventDefault()
-            doc = f2o @$('form')
-            console.log doc
-            console.log 'save'
+            data = f2o @$('form')
+            text = new Text
+            u = new User
+            text.set('desc', data.title)
+            text.set('user', u)
+            revision = new Revision
+            revision.set('content', data.content)
+            text.get('revisions').add( { revision: revision } )
+            debugger
+            text.save()
         render: -> @.$el.show()
 
     RecentView = Backbone.View.extend
@@ -117,11 +124,32 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
         render: -> @.$el.show()
 
     # Models
-    User = Backbone.RelationalModel.extend
+    window.User = Backbone.RelationalModel.extend
         defaults:
             info: ''
 
-    Revision = Backbone.RelationalModel.extend
+
+    window.Text = Backbone.RelationalModel.extend
+        url: '/text'
+        relations: [{
+            type:'HasOne'
+            key:'user'
+            relatedModel: 'User'
+            reverseRelation: {
+                key: 'texts'
+            }
+        }],
+        defaults:
+            category_slug: 'no-category'
+            category: 'no category'
+
+        validate: (attrs) ->
+            if not attrs.desc
+                return "desc required"
+            else
+                return
+
+    window.Revision = Backbone.RelationalModel.extend
         # TODO ranges
         relations: [{
             type: 'HasOne'
@@ -135,26 +163,7 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
             idx: 1
             content: ''
 
-    Text = Backbone.RelationalModel.extend
-        relations: [{
-            type:'HasOne'
-            key:'user'
-            relatedModel: 'User'
-            reverseRelation: {
-                key: 'text'
-            }
-        }],
-        defaults:
-            category_slug: 'no-category'
-            category: 'no category'
-
-        validate: (attrs) ->
-            if not attrs.slug
-                return "slug required"
-            else if not desc
-                return "desc required"
-            else
-                return
+    debugger
 
     TextCollection = Backbone.Collection.extend
         model: Text
