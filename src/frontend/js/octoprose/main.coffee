@@ -9,7 +9,11 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'js/bootstrap/bootstrap.js
             submit: 'submit'
             peruse: 'peruse'
             account: 'account'
-            logout: 'logout'
+
+            'account/documents': 'account_documents',
+            'account/suggestions': 'account_suggestions',
+            'account/profile': 'account_profile',
+            'account/logout': 'account_logout',
         default: ->
             if authed()
                 return @navigate('account', trigger: true)
@@ -59,18 +63,15 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'js/bootstrap/bootstrap.js
             if not authed()
                 return @navigate('/', trigger:true)
             $('#center, #rightbar, #leftbar').empty()
-            $('<a>', href: '#')
-                .text('Logout')
-                .appendTo('#center')
-                .click (e) =>
-                    e.preventDefault()
-                    cookie.remove 'octoauth'
-                    $.get('/logout').success(=>
-                        @navigate '/', trigger:true
-                    ).error(=>
-                        console.error 'could not logout'
-                    )
-        # logout: ->
+            $('#leftbar').append($('#accountBar').clone().show()).show()
+        account_documents: ->
+        account_suggestions: ->
+        account_profile: ->
+        account_logout: ->
+            cookie.remove 'octoauth'
+            $.get('/logout').success(=>
+                @navigate '/', trigger:true
+            ).error(=> console.error 'could not logout')
 
     f2o = (f) ->
         data = {}
