@@ -92,7 +92,6 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
             revision = new Revision
             revision.set('content', data.content)
             text.get('revisions').add( { revision: revision } )
-            debugger
             text.save()
         render: -> @.$el.show()
 
@@ -163,7 +162,6 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
             idx: 1
             content: ''
 
-    debugger
 
     TextCollection = Backbone.Collection.extend
         model: Text
