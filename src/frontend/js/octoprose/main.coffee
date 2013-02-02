@@ -1,6 +1,7 @@
-define ['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], ($, _, Backbone) ->
+define ['jquery', 'underscore', 'backbone', 'cookie', 'js/bootstrap/bootstrap.js'], ($, _, Backbone, cookie) ->
     log = console.log
     error = console.error
+    authed = -> cookie.get 'octoauth'
     Router = Backbone.Router.extend
         initialize: ->
             @route /^\/?$/, 'default', @default
@@ -10,33 +11,66 @@ define ['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], ($, _,
             account: 'account'
             logout: 'logout'
         default: ->
-            @authView = new AuthView(el:$('#auth'))
-            # eventually:
-            #$('#leftbar','#center','#rightbar').empty()
+            if authed()
+                return @navigate('account', trigger: true)
+            @authView = new AuthView(el:$('#auth').clone())
+            @recentView = new RecentView(el:$('#recent').clone())
+
+            $('#rightbar')
+                .empty()
+                .show()
+                .append(@recentView.$el)
+
+            $('#center')
+                .empty()
+                .show()
+                .append($('#frontblurb').clone().show())
+
             $('#leftbar')
                 .empty()
                 .show()
                 .append(@authView.$el)
+            @recentView.render()
+
             @authView.render()
             # this should be automatic. fucker.
             @authView.delegateEvents(@authView.events)
             @authView.on 'login', =>
+                cookie.set 'octoauth', 'true'
                 @navigate 'submit', trigger:true
             @authView.on 'signup', =>
+                cookie.set 'octoauth', 'true'
                 @navigate 'account', trigger:true
         submit: ->
+            if not authed()
+                return @navigate('/', trigger:true)
             $('#leftbar, #center, #rightbar').empty()
             $('#leftbar').hide()
 
-            @editorView = new EditorView(el:$('#editor'))
+            @editorView = new EditorView(el:$('#editor').clone())
             $('#center').append @editorView.$el
             @editorView.render()
             @editorView.delegateEvents @editorView.events
             $('#rightbar').text('SETTINGS')
         peruse: ->
+            if not authed()
+                return @navigate('/', trigger:true)
         account: ->
-            console.log 'account'
-        logout: ->
+            if not authed()
+                return @navigate('/', trigger:true)
+            $('#center, #rightbar, #leftbar').empty()
+            $('<a>', href: '#')
+                .text('Logout')
+                .appendTo('#center')
+                .click (e) =>
+                    e.preventDefault()
+                    cookie.remove 'octoauth'
+                    $.get('/logout').success(=>
+                        @navigate '/', trigger:true
+                    ).error(=>
+                        console.error 'could not logout'
+                    )
+        # logout: ->
 
     f2o = (f) ->
         data = {}
@@ -50,9 +84,10 @@ define ['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], ($, _,
         save: (e) ->
             e.preventDefault()
             console.log 'save'
-        render: ->
-            @.$el.show()
-            @
+        render: -> @.$el.show()
+
+    RecentView = Backbone.View.extend
+        render: -> @$el.show()
 
     AuthView = Backbone.View.extend
         events:
@@ -76,9 +111,7 @@ define ['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], ($, _,
                 console.log('nope')
                 # TODO
             )
-        render: ->
-            @.$el.show()
-            @
+        render: -> @.$el.show()
 
     return {
         init: ->

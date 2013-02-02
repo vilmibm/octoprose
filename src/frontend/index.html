@@ -9,18 +9,7 @@
 <body>
     <script src="jam/require.js"></script>
     <script>
-        require(['jquery', 'underscore', 'backbone', 'js/bootstrap/bootstrap.js'], function($, _, Backbone) {
-            require(['js/octoprose/main.js'], function(octoprose) {
-                octoprose.init();
-            });
-        });
-    </script>
-    <script>
-    //    var auth = window.localStorage.getItem('auth');
-    //    if (auth) {
-    //        window._user = JSON.parse(auth);
-    //        window._router.navigate('/account', {trigger:true});
-    //    }
+        require(['js/octoprose/main.js'], function(octoprose) { octoprose.init(); });
     </script>
     <div class="container-fluid">
         <div class="navbar">
@@ -37,54 +26,61 @@
             <div id="leftbar" class="span3">
             </div> <!-- /.span3 -->
             <div id="center" class="span6">
-                <h1>octoprose</h1>
-                <p class="lead">is a free, useful tool for proofreading prose.</p>
-                <p>Easily toss your written works onto octoprose and solicit
-                feedback privately from friends. Or open up your works to the
-                public to trade feedback with other writers.</p>
-                <p>octoprose makes it easy to ask for feedback, incorporate it
-                into your work, and track revisions as you go. octoprose is not
-                meant for authoring documents from scratch: there are better
-                tools for that. octoprose is for getting those crucial, deep
-                overviews that you used to get from your English teachers in
-                high school.</p>
             </div> <!-- /.span9 -->
             <div id="rightbar" class="span3">
-                <h6>recent uploads</h6>
-                <ul>
-                    <li>
-                        <a href="#">short scifi piece</a>
-                        <p>
-                            <small><em>
-                                Ankram fled the burning ship...
-                            </em></small>
-                        </p>
-                    </li>
-                    <li>
-                        <a href="#">history essay</a>
-                        <p>
-                            <small><em>
-                                Four score and seven elevens ago...
-                            </em></small>
-                        </p>
-                    </li>
-                    <li>
-                        <a href="#">speech</a>
-                        <p>
-                            <small><em>
-                                Hello and good morning...
-                            </em></small>
-                        </p>
-                    </li>
-                </ul>
-                <p>
-                    <small>
-                        <a href="#/peruse">more...</a>
-                    </small>
-                </p>
             </div>
         </div> <!-- /.row-fluid -->
     </div> <!-- /.container-fluid -->
+
+    <!-- templates -->
+
+    <div id="recent" style="display:none">
+        <h6>recent uploads</h6>
+        <ul>
+            <li>
+                <a href="#">short scifi piece</a>
+                <p>
+                    <small><em>
+                        Ankram fled the burning ship...
+                    </em></small>
+                </p>
+            </li>
+            <li>
+                <a href="#">history essay</a>
+                <p>
+                    <small><em>
+                        Four score and seven elevens ago...
+                    </em></small>
+                </p>
+            </li>
+            <li>
+                <a href="#">speech</a>
+                <p>
+                    <small><em>
+                        Hello and good morning...
+                    </em></small>
+                </p>
+            </li>
+        </ul>
+        <p>
+            <small>
+                <a href="#/peruse">more...</a>
+            </small>
+        </p>
+    </div>
+    <div id="frontblurb" style="display:none">
+        <h1>octoprose</h1>
+        <p class="lead">is a free, useful tool for proofreading prose.</p>
+        <p>Easily toss your written works onto octoprose and solicit
+        feedback privately from friends. Or open up your works to the
+        public to trade feedback with other writers.</p>
+        <p>octoprose makes it easy to ask for feedback, incorporate it
+        into your work, and track revisions as you go. octoprose is not
+        meant for authoring documents from scratch: there are better
+        tools for that. octoprose is for getting those crucial, deep
+        overviews that you used to get from your English teachers in
+        high school.</p>
+    </div>
     <div id="auth" style="display:none">
         <p class="muted">log in</p>
         <form class="form" id="login" method="GET" action="#">
