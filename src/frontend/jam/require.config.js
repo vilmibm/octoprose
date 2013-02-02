@@ -11,6 +11,11 @@ var jam = {
             "main": "underscore.js"
         },
         {
+            "name": "cookie",
+            "location": "jam/cookie",
+            "main": "cookie.js"
+        },
+        {
             "name": "jquery",
             "location": "jam/jquery",
             "main": "dist/jquery.js"
@@ -45,6 +50,11 @@ if (typeof require !== "undefined" && require.config) {
             "main": "underscore.js"
         },
         {
+            "name": "cookie",
+            "location": "jam/cookie",
+            "main": "cookie.js"
+        },
+        {
             "name": "jquery",
             "location": "jam/jquery",
             "main": "dist/jquery.js"
@@ -76,6 +86,11 @@ else {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
+        },
+        {
+            "name": "cookie",
+            "location": "jam/cookie",
+            "main": "cookie.js"
         },
         {
             "name": "jquery",
