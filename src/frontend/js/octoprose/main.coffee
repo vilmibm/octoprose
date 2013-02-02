@@ -75,7 +75,7 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'js/bootstrap/bootstrap.js
 
     f2o = (f) ->
         data = {}
-        $(f).find('input').each ->
+        $(f).find('*[name]').each ->
             data[@name] = $(@).val()
         data
 
@@ -84,6 +84,8 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'js/bootstrap/bootstrap.js
             'submit form': 'save'
         save: (e) ->
             e.preventDefault()
+            doc = f2o @$('form')
+            console.log doc
             console.log 'save'
         render: -> @.$el.show()
 
