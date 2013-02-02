@@ -116,6 +116,54 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
             )
         render: -> @.$el.show()
 
+    # Models
+    User = Backbone.RelationalModel.extend
+        defaults:
+            info: ''
+
+    Revision = Backbone.RelationalModel.extend
+        # TODO ranges
+        relations: [{
+            type: 'HasOne'
+            key: 'text'
+            relatedModel: 'Text'
+            reverseRelation: {
+                key: 'revisions'
+            }
+        }]
+        defaults:
+            idx: 1
+            content: ''
+
+    Text = Backbone.RelationalModel.extend
+        relations: [{
+            type:'HasOne'
+            key:'user'
+            relatedModel: 'User'
+            reverseRelation: {
+                key: 'text'
+            }
+        }],
+        defaults:
+            category_slug: 'no-category'
+            category: 'no category'
+
+        validate: (attrs) ->
+            if not attrs.slug
+                return "slug required"
+            else if not desc
+                return "desc required"
+            else
+                return
+
+    TextCollection = Backbone.Collection.extend
+        model: Text
+        url: '/texts'
+
+    #$.getJSON('/currentUserTexts').success(=>
+    #).error(=>
+    #)
+
     return {
         init: ->
             router = new Router
