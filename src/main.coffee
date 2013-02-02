@@ -90,7 +90,7 @@ app.post '/signup', (req, res, next) ->
         return next new DBError(e) if e
         res.send 200
 
-app.get '/logout', ensureAuth, (req, res, next) ->
+app.get '/logout', (req, res, next) ->
     req.logout()
     res.send(200)
 
