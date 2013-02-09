@@ -1,15 +1,25 @@
-define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootstrap/bootstrap.js'], ($, _, Backbone, cookie) ->
+define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'backbone-rel', 'js/bootstrap/bootstrap.js'], ($, _, Backbone, md5, cookie) ->
     log = console.log
     error = console.error
-    authed = -> cookie.get 'octoauth'
+    slugify = md5.hex.bind md5
+    authed = cookie.get.bind cookie, 'octoauth'
+    get_current_user = -> new User(JSON.parse(localStorage.getItem('user')))
+    set_current_user = (data) ->
+         localStorage.setItem('user', JSON.stringify(data))
+         return new User(data)
+    unset_current_user = ->
+        localStorage.removeItem 'user'
+
     Router = Backbone.Router.extend
         initialize: ->
             @route /^\/?$/, 'default', @default
         routes:
             submit: 'submit'
-            peruse: 'peruse'
-            account: 'account'
 
+            peruse: 'peruse'
+            'peruse/text/:slug': 'peruse_text'
+
+            account: 'account'
             'account/documents': 'account_documents',
             'account/suggestions': 'account_suggestions',
             'account/profile': 'account_profile',
@@ -55,20 +65,31 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
             $('#center').append @editorView.$el
             @editorView.render()
             @editorView.delegateEvents @editorView.events
+            @editorView.on 'new', (slug) => @navigate "peruse/text/#{slug}", trigger:true
             $('#rightbar').text('SETTINGS')
         peruse: ->
             if not authed()
-                return @navigate('/', trigger:true)
+                return @navigate '/', trigger:true
+        peruse_text: (slug) ->
+            text = new Text
+            text.set('slug', slug)
+            $('#center, #rightbar, #leftbar').empty().hide()
+            @textView = new TextView(model:text)#, el:$('#text').clone())
+            @textView.delegateEvents @textView.events
+            $('#center').append(@textView.$el).show()
+            text.on 'change', => @textView.render().show()
+            text.fetch()
         account: ->
             if not authed()
                 return @navigate('/', trigger:true)
-            $('#center, #rightbar, #leftbar').empty()
+            $('#center, #rightbar, #leftbar').empty().hide()
             $('#leftbar').append($('#accountBar').clone().show()).show()
         account_documents: ->
         account_suggestions: ->
         account_profile: ->
         account_logout: ->
             cookie.remove 'octoauth'
+            unset_current_user()
             $.get('/logout').success(=>
                 @navigate '/', trigger:true
             ).error(=> console.error 'could not logout')
@@ -79,6 +100,9 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
             data[@name] = $(@).val()
         data
 
+    TextView = Backbone.View.extend
+        render: -> @$el.html('TEXTZ')
+
     EditorView = Backbone.View.extend
         events:
             'submit form': 'save'
@@ -86,12 +110,15 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
             e.preventDefault()
             data = f2o @$('form')
             text = new Text
-            u = new User
+            u = get_current_user()
             text.set('desc', data.title)
             text.set('user', u)
+            text.set('slug', slugify(text.get('desc')))
+
             revision = new Revision
             revision.set('content', data.content)
             text.get('revisions').add( { revision: revision } )
+            text.on 'sync', => @trigger 'new', text.get('slug')
             text.save()
         render: -> @.$el.show()
 
@@ -106,7 +133,10 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
             e.preventDefault()
             data = f2o e.target
             $.post('/login', data)
-            .success(=> @trigger 'login')
+            .success((data) =>
+                set_current_user data
+                @trigger 'login'
+            )
             .error(=>
                 console.log('nope')
                 # TODO
@@ -115,7 +145,10 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
             e.preventDefault()
             data = f2o e.target
             $.post('/signup', data)
-            .success(=> @trigger 'signup')
+            .success((data) =>
+                set_current_user data
+                @trigger 'signup'
+            )
             .error(=>
                 console.log('nope')
                 # TODO
@@ -138,15 +171,19 @@ define ['jquery', 'underscore', 'backbone', 'cookie', 'backbone-rel', 'js/bootst
                 key: 'texts'
             }
         }],
-        defaults:
-            category_slug: 'no-category'
-            category: 'no category'
+        sync: (method, text) ->
+            if method isnt 'read'
+                return Backbone.sync.apply(Backbone, arguments)
 
-        validate: (attrs) ->
-            if not attrs.desc
-                return "desc required"
-            else
-                return
+            $.getJSON("/text/#{text.get('slug')}")
+                .success((data) ->
+                    text.set data
+                    text.trigger 'sync'
+                )
+                .error -> console.error text.get('slug')
+
+        defaults:
+            category: 'no category'
 
     window.Revision = Backbone.RelationalModel.extend
         # TODO ranges

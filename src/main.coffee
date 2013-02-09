@@ -1,5 +1,7 @@
 #/usr/bin/env coffee
+async = require 'async'
 express = require 'express'
+hash = require 'node_hash'
 p = require 'passport'
 _ = require 'underscore'
 
@@ -9,19 +11,11 @@ LocalStrategy = require('passport-local').Strategy
 RedisStore = require('connect-redis')(express)
 
 # errors
-errors = require('./errors')
-NotFoundError = errors.NotFoundError
-PermError = errors.PermError
-DBError = errors.DBError
-ValidationError = errors.ValidationError
+{ NotFoundError, PermError, DBError, ValidationError } = require './errors'
 
 # models
 models = require('./models')
-Suggestion = models.Suggestion
-Revision = models.Revision
-Range = models.Range
-User = models.User
-Text = models.Text
+{ Suggestion, Revision, Range, User, Text } = require './models'
 
 p.serializeUser (user, done) -> done null, user.email
 p.deserializeUser (email, done) ->
@@ -64,20 +58,46 @@ app.set('views', "#{__dirname}/../front")
 app.get '/', (req, res, next) -> res.rend 'index.html'
 
 # data api
-# TODO
+
+app.get '/text/:slug', (q, s, n) ->
+    slug = q.params.slug
+    text = Text.find slug:slug, (err, doc) ->
+        return n new DBError err if err
+        return n new NotFoundError slug unless doc
+        s.send doc
+
+app.post '/text', ensureAuth, (q,s,n) ->
+    author = q.user
+
+    text = new Text
+    text._user = author
+    text.category = q.body.category
+    text.desc = q.body.desc
+    text.slug = q.body.slug
+
+    revision = new Revision
+    revision.content = q.body.revisions[0].content
+    revision._text = text
+
+    async.series [
+        (cb) -> revision.save(cb),
+        (cb) ->
+            text.revisions.push(revision)
+            text.save(cb)
+    ], (e, _) -> s.send({slug:text.slug})
 
 # auth
 app.post '/login', p.authenticate('local', {}), (q,s,n) ->
-    s.send 200
+    s.send q.user
 
 app.post '/signup', (req, res, next) ->
-    fields = ['email', 'password']
+    fields = ['username', 'email', 'password']
 
     captcha = req.body.captcha
     unless captcha and captcha.toLowerCase() in ['4', 'four']
         return next new ValidationError(captcha, 'the correct answer')
 
-    required = ['email', 'password']
+    required = ['username', 'email', 'password']
     missing = _.difference(required, _(req.body).keys())
     if missing.length > 0
         return next new ValidationError(required, _.difference(required, missing))
@@ -88,7 +108,7 @@ app.post '/signup', (req, res, next) ->
 
     user.save (e) ->
         return next new DBError(e) if e
-        res.send 200
+        res.send user.toJSON()
 
 app.get '/logout', (req, res, next) ->
     req.logout()

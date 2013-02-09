@@ -51,7 +51,7 @@ TextSchema = new Schema(
     _user: ref 'User'
     slug: {type:String, required:true}
     category: {type:String, default:'no category'}
-    category_slug: {type:String, default:'no-category'}
+    #category_slug: {type:String, default:'no-category'}
     desc: {type:String, required:true}
     revisions: [ref 'Revision']
 )
