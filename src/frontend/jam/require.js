@@ -2005,6 +2005,11 @@ var jam = {
             "main": "backbone-relational.js"
         },
         {
+            "name": "md5",
+            "location": "jam/md5",
+            "main": "md5.js"
+        },
+        {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
@@ -2054,6 +2059,11 @@ if (typeof require !== "undefined" && require.config) {
             "main": "backbone-relational.js"
         },
         {
+            "name": "md5",
+            "location": "jam/md5",
+            "main": "md5.js"
+        },
+        {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
@@ -2100,6 +2110,11 @@ else {
             "name": "backbone-rel",
             "location": "jam/backbone-rel",
             "main": "backbone-relational.js"
+        },
+        {
+            "name": "md5",
+            "location": "jam/md5",
+            "main": "md5.js"
         },
         {
             "name": "underscore",
