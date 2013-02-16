@@ -109,9 +109,7 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
                 desc: @model.get('desc')
                 content: @model.get('revisions').last().get('content')
 
-            console.log context
             html = @tmpl.render context
-            console.log html
             @$el.html html
 
     EditorView = Backbone.View.extend
