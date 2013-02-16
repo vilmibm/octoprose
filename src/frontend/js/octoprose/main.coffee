@@ -1,4 +1,4 @@
-define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'backbone-rel', 'js/bootstrap/bootstrap.js'], ($, _, Backbone, md5, cookie) ->
+define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-rel', 'js/bootstrap/bootstrap.js'], ($, _, Backbone, md5, cookie, hogan) ->
     log = console.log
     error = console.error
     slugify = md5.hex.bind md5
