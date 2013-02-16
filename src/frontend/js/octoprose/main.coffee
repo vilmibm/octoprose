@@ -75,7 +75,7 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             text = new Text
             text.set('slug', slug)
             $('#center, #rightbar, #leftbar').empty().hide()
-            @textView = new TextView(model:text)#, el:$('#text').clone())
+            @textView = new TextView(model:text, el:$('#text').clone())
             @textView.delegateEvents @textView.events
             $('#center').append(@textView.$el).show()
             text.on 'change', => @textView.render().show()
@@ -102,7 +102,17 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
         data
 
     TextView = Backbone.View.extend
-        render: -> @$el.html('TEXTZ')
+        initialize: ->
+            @tmpl = hogan.compile(@el.innerHTML)
+        render: ->
+            context =
+                desc: @model.get('desc')
+                content: @model.get('revisions').last().get('content')
+
+            console.log context
+            html = @tmpl.render context
+            console.log html
+            @$el.html html
 
     EditorView = Backbone.View.extend
         events:
@@ -118,7 +128,7 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
 
             revision = new Revision
             revision.set('content', data.content)
-            text.get('revisions').add( { revision: revision } )
+            text.get('revisions').add revision
             text.on 'sync', => @trigger 'new', text.get('slug')
             text.save()
         render: -> @.$el.show()
