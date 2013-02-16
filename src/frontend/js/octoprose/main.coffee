@@ -25,8 +25,8 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
         default: ->
             if authed()
                 return @navigate('account', trigger: true)
-            @authView = new AuthView(el:$('#auth').clone())
-            @recentView = new RecentView(el:$('#recent').clone())
+            @authView = new AuthView(template:tmpl('auth'))
+            @recentView = new RecentView(template:tmpl('recent'))
 
             $('#rightbar')
                 .empty()
@@ -59,13 +59,13 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             $('#leftbar, #center, #rightbar').empty()
             $('#leftbar').hide()
 
-            @editorView = new EditorView(el:$('#editor').clone())
+            @editorView = new EditorView(template:tmpl('editor'))
             $('#center').append(@editorView.$el).show()
 
             @editorView.render()
             @editorView.delegateEvents @editorView.events
             @editorView.on 'new', (slug) => @navigate "peruse/text/#{slug}", trigger:true
-            $('#rightbar').text('SETTINGS')
+            $('#rightbar').text('SETTINGS').show()
         peruse: ->
             if not authed()
                 return @navigate '/', trigger:true
@@ -73,7 +73,7 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             text = new Text
             text.set('slug', slug)
             $('#center, #rightbar, #leftbar').empty().hide()
-            @textView = new TextView(model:text, el:$('#text').clone())
+            @textView = new TextView(model:text, template: tmpl('text'))
             @textView.delegateEvents @textView.events
             $('#center').append(@textView.$el).show()
             text.on 'change', => @textView.render().show()
@@ -82,11 +82,11 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             if not authed()
                 return @navigate('/', trigger:true)
             $('#center, #rightbar, #leftbar').empty().hide()
-            $('#leftbar').append($('#accountBar').clone().show()).show()
+            $('#leftbar').html($('#accountBar').text()).show()
 
         account_documents: ->
             $('#center, #rightbar, #leftbar').empty().hide()
-            $('#leftbar').append($('#accountBar').clone().show()).show()
+            $('#leftbar').html($('#accountBar').text()).show()
             window.localStorage.setItem 'userTexts', JSON.stringify([{desc:'hello', revisions:[1,2,3]}])
             userTexts = new Texts(JSON.parse window.localStorage.getItem('userTexts'))
             @listView = new TextsView collection:userTexts, template: tmpl('texts')
@@ -109,15 +109,14 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
         data
 
     TextView = Backbone.View.extend
-        initialize: () ->
-            @tmpl = hogan.compile @el.innerHTML
+        tagName: 'div'
+        initialize: ({@template}) ->
         render: ->
             context =
                 desc: @model.get('desc')
                 content: @model.get('revisions').last().get('content')
 
-            html = @tmpl.render context
-            @$el.html html
+            @$el.html(@template.render(context))
 
     TextsView = Backbone.View.extend
         initialize: ({@template}) ->
@@ -132,6 +131,7 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             return @$el.html html
 
     EditorView = Backbone.View.extend
+        initialize: ({@template}) ->
         events:
             'submit form': 'save'
         save: (e) ->
@@ -148,12 +148,14 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             text.get('revisions').add revision
             text.on 'sync', => @trigger 'new', text.get('slug')
             text.save()
-        render: -> @.$el.show()
+        render: -> @$el.html(@template.render())
 
     RecentView = Backbone.View.extend
-        render: -> @$el.show()
+        initialize: ({@template}) ->
+        render: -> @$el.html(@template.render())
 
     AuthView = Backbone.View.extend
+        initialize: ({@template}) ->
         events:
             'submit #login': 'login',
             'submit #signup': 'signup',
@@ -181,7 +183,7 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
                 console.log('nope')
                 # TODO
             )
-        render: -> @.$el.show()
+        render: -> @$el.html @template.render()
 
     # Models
     window.User = Backbone.RelationalModel.extend

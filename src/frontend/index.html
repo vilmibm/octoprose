@@ -32,9 +32,9 @@
         </div> <!-- /.row-fluid -->
     </div> <!-- /.container-fluid -->
 
-    <!-- templates -->
+    <!-- Templates -->
 
-    <div id="recent" style="display:none">
+    <script type="text/mustache" id="recent">
         <h6>recent uploads</h6>
         <ul>
             <li>
@@ -67,7 +67,7 @@
                 <a href="#/peruse">more...</a>
             </small>
         </p>
-    </div>
+    </script>
 
     <div id="frontblurb" style="display:none">
         <h1>octoprose</h1>
@@ -83,12 +83,13 @@
         high school.</p>
     </div>
 
-    <div id="text" style="display:none">
+    <script type="text/mustache" id="text">
         <h1>{{desc}}</h1>
         <!-- TODO revision list -->
         <p>{{content}}</p>
-    </div>
-    <script type="mustache" id="texts">
+    </script> <!-- /#text -->
+
+    <script type="text/mustache" id="texts">
         <table class="table">
             <tr>
                 <th>description</th> <th>revisions</th>
@@ -99,10 +100,10 @@
             </tr>
             {{/ texts }}
         </table>
-    </script>
+    </script> <!-- /#texts -->
 
 
-    <div id="auth" style="display:none">
+    <script type="text/mustache" id="auth">
         <p class="muted">log in</p>
         <form class="form" id="login" method="GET" action="#">
             <input name="username" placeholder="email" type="email" required="true"/><br />
@@ -120,9 +121,9 @@
             </p>
             <button class="btn-mini" type="submit">sign up</button>
         </form>
-    </div> <!-- #auth -->
+    </script> <!-- #auth -->
 
-    <div id="editor" style="display:none">
+    <script type="text/mustache" id="editor">
         <form>
             <fieldset>
                 <input type="text" name="title" placeholder="title" /><br/>
@@ -130,9 +131,9 @@
                 <button class="btn">save</button>
             </fieldset>
         </form>
-    </div> <!-- /#editor -->
+    </script> <!-- /#editor -->
 
-    <div id="accountBar" style="display:none">
+    <script type="text/mustache" id="accountBar">
         <ul class="nav nav-list">
             <li class="nav-header"> my stuff </li>
             <li> <a href="#/account/documents"> documents </a> </li>
@@ -141,6 +142,6 @@
             <li> <a href="#/account/profile"> profile </a> </li>
             <li> <a href="#/account/logout"> <strong>logout</strong> </a> </li>
         </ul>
-    </div> <!-- /#accountBar -->
+    </script> <!-- /#accountBar -->
 </body>
 </html>
