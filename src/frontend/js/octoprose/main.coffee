@@ -1,3 +1,8 @@
+# TODO
+# What to do when a new thing is submitted? listen for such an event and update
+# what is in cache? keep an app-global collection for the current user's texts,
+# mutate it?
+
 reqs = [
     'jquery'
     'underscore'
