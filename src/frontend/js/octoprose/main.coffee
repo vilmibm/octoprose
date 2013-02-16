@@ -256,10 +256,6 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
 #
 ## Submission views
 #
-#EditorView = Backbone.View.extend
-#    # textarea
-#    initialize: () ->
-#
 #SettingsView = Backbone.View.extend
 #    # public, genre, etc
 #    initialize: () ->
