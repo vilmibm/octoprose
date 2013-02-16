@@ -12,11 +12,11 @@ reqs = [
 define reqs, ($, _, Backbone, md5, cookie, hogan, store) ->
     slugify = (d) -> md5.hex(d + String(Date.now()))
     authed = cookie.get.bind cookie, 'octoauth'
-    getCurrentUser = -> new User(JSON.parse(localStorage.getItem('user')))
+    getCurrentUser = -> new User(store.get 'user')
     setCurrentUser = (data) ->
-         localStorage.setItem('user', JSON.stringify(data))
+         store.set('user', data)
          return new User(data)
-    unsetCurrentUser = -> localStorage.removeItem 'user'
+    unsetCurrentUser = -> store.remove 'user'
     tmpl = (name) -> hogan.compile $("##{name}").text()
 
     Router = Backbone.Router.extend
@@ -58,7 +58,13 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store) ->
             @authView.render()
             # this should be automatic. fucker.
             @authView.delegateEvents(@authView.events)
-            @authView.on 'login', =>
+            @authView.on 'login', (userData) =>
+                setCurrentUser userData
+                $.ajax
+                    url: '/currentUserTexts'
+                    async: false
+                    dataType: 'json'
+                    success: (texts) => store.set 'userTexts', texts
                 cookie.set 'octoauth', 'true'
                 @navigate 'submit', trigger:true
             @authView.on 'signup', =>
@@ -98,8 +104,8 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store) ->
         account_documents: ->
             $('#center, #rightbar, #leftbar').empty().hide()
             $('#leftbar').html($('#accountBar').text()).show()
-            window.localStorage.setItem 'userTexts', JSON.stringify([{desc:'hello', revisions:[1,2,3]}])
-            userTexts = new Texts(JSON.parse window.localStorage.getItem('userTexts'))
+            # store.set 'userTexts', [{desc:'hello', revisions:[1,2,3]}]
+            userTexts = new Texts(store.get 'userTexts')
             @listView = new TextsView collection:userTexts, template: tmpl('texts')
             $('#center').append(@listView.$el).show()
             @listView.render().show()
@@ -175,8 +181,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store) ->
             data = f2o e.target
             $.post('/login', data)
             .success((data) =>
-                setCurrentUser data
-                @trigger 'login'
+                @trigger 'login', data
             )
             .error(=>
                 console.log('nope')

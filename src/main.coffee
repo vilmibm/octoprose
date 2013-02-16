@@ -59,6 +59,11 @@ app.get '/', (req, res, next) -> res.rend 'index.html'
 
 # data api
 
+app.get '/currentUserTexts', ensureAuth, (q, s, n) ->
+    Text.find(_user:q.user).populate('revisions').exec (err, docs) ->
+        return n new DBError err if err
+        s.send docs
+
 app.get '/text/:slug', (q, s, n) ->
     slug = q.params.slug
     text = Text.findOne(slug:slug).populate('revisions').exec (err, doc) ->
