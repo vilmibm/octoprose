@@ -83,7 +83,16 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
                 return @navigate('/', trigger:true)
             $('#center, #rightbar, #leftbar').empty().hide()
             $('#leftbar').append($('#accountBar').clone().show()).show()
+
         account_documents: ->
+            $('#center, #rightbar, #leftbar').empty().hide()
+            $('#leftbar').append($('#accountBar').clone().show()).show()
+            window.localStorage.setItem 'userTexts', JSON.stringify([{desc:'hello', revisions:[1,2,3]}])
+            userTexts = new Texts(JSON.parse window.localStorage.getItem('userTexts'))
+            @listView = new TextsView collection:userTexts, template: tmpl('texts')
+            $('#center').append(@listView.$el).show()
+            @listView.render().show()
+
         account_suggestions: ->
         account_profile: ->
         account_logout: ->
@@ -100,8 +109,8 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
         data
 
     TextView = Backbone.View.extend
-        initialize: ->
-            @tmpl = hogan.compile(@el.innerHTML)
+        initialize: () ->
+            @tmpl = hogan.compile @el.innerHTML
         render: ->
             context =
                 desc: @model.get('desc')
@@ -109,6 +118,18 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
 
             html = @tmpl.render context
             @$el.html html
+
+    TextsView = Backbone.View.extend
+        initialize: ({@template}) ->
+        render: ->
+            truncate = (n, s) -> if s.length > n then "#{s[..n]}..." else s
+            context =
+                texts: @collection.map (text) -> {
+                    desc: truncate(100, text.get('desc'))
+                    numRevisions: text.get('revisions').length
+                }
+            html = @template.render context
+            return @$el.html html
 
     EditorView = Backbone.View.extend
         events:
@@ -207,7 +228,8 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             content: ''
 
 
-    TextCollection = Backbone.Collection.extend
+    # Collections
+    Texts = Backbone.Collection.extend
         model: Text
         url: '/texts'
 
