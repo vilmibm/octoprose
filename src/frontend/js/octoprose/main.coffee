@@ -1,4 +1,15 @@
-define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-rel', 'js/bootstrap/bootstrap.js'], ($, _, Backbone, md5, cookie, hogan) ->
+reqs = [
+    'jquery'
+    'underscore'
+    'backbone'
+    'md5'
+    'cookie'
+    'hogan'
+    'store'
+    'backbone-rel'
+    'js/bootstrap/bootstrap.js'
+]
+define reqs, ($, _, Backbone, md5, cookie, hogan, store) ->
     slugify = (d) -> md5.hex(d + String(Date.now()))
     authed = cookie.get.bind cookie, 'octoauth'
     getCurrentUser = -> new User(JSON.parse(localStorage.getItem('user')))
