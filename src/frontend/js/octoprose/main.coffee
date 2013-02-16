@@ -1,14 +1,12 @@
 define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-rel', 'js/bootstrap/bootstrap.js'], ($, _, Backbone, md5, cookie, hogan) ->
-    log = console.log
-    error = console.error
-    slugify = md5.hex.bind md5
+    slugify = (d) -> md5.hex(d + String(Date.now()))
     authed = cookie.get.bind cookie, 'octoauth'
-    get_current_user = -> new User(JSON.parse(localStorage.getItem('user')))
-    set_current_user = (data) ->
+    getCurrentUser = -> new User(JSON.parse(localStorage.getItem('user')))
+    setCurrentUser = (data) ->
          localStorage.setItem('user', JSON.stringify(data))
          return new User(data)
-    unset_current_user = ->
-        localStorage.removeItem 'user'
+    unsetCurrentUser = -> localStorage.removeItem 'user'
+    tmpl = (name) -> hogan.compile $("##{name}").text()
 
     Router = Backbone.Router.extend
         initialize: ->
@@ -90,7 +88,7 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
         account_profile: ->
         account_logout: ->
             cookie.remove 'octoauth'
-            unset_current_user()
+            unsetCurrentUser()
             $.get('/logout').success(=>
                 @navigate '/', trigger:true
             ).error(=> console.error 'could not logout')
@@ -119,7 +117,7 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             e.preventDefault()
             data = f2o @$('form')
             text = new Text
-            u = get_current_user()
+            u = getCurrentUser()
             text.set('desc', data.title)
             text.set('user', u)
             text.set('slug', slugify(text.get('desc')))
@@ -143,7 +141,7 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             data = f2o e.target
             $.post('/login', data)
             .success((data) =>
-                set_current_user data
+                setCurrentUser data
                 @trigger 'login'
             )
             .error(=>
@@ -155,7 +153,7 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             data = f2o e.target
             $.post('/signup', data)
             .success((data) =>
-                set_current_user data
+                setCurrentUser data
                 @trigger 'signup'
             )
             .error(=>
@@ -212,10 +210,6 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
     TextCollection = Backbone.Collection.extend
         model: Text
         url: '/texts'
-
-    #$.getJSON('/currentUserTexts').success(=>
-    #).error(=>
-    #)
 
     return {
         init: ->
