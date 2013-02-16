@@ -3,6 +3,10 @@ mg.connect('mongodb://localhost/octoprose_dev')
 Schema = mg.Schema
 ref = (model) -> {type:Schema.ObjectId, ref:model}
 
+setCreated = (n) ->
+    @created = @_id.getTimestamp() unless @created
+    n()
+
 SignupRequestSchema = new Schema(
     username: {type:String, index:true}
     email: {type:String}
@@ -32,6 +36,7 @@ SuggestionSchema = new Schema(
     _range: ref 'Range'
     _revision: ref 'Revision'
 )
+SuggestionSchema.pre 'save', setCreated
 
 RangeSchema = new Schema(
     offset: {type:Number, required:true}
@@ -52,9 +57,11 @@ TextSchema = new Schema(
     slug: {type:String, required:true}
     category: {type:String, default:'no category'}
     #category_slug: {type:String, default:'no-category'}
+    created: {type:Date}
     desc: {type:String, required:true}
     revisions: [ref 'Revision']
 )
+TextSchema.pre 'save', setCreated
 
 exports.User = mg.model('User', UserSchema)
 exports.Suggestion = mg.model('Suggestion', SuggestionSchema)

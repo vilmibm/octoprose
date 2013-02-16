@@ -91,15 +91,24 @@
 
     <script type="text/mustache" id="texts">
         <h2>My Texts <button class="btn btn-mini"><i class="icon-refresh"></i></button></h2>
-        <table class="table table-bordered table-striped">
-            <tr>
-                <th>Description</th> <th>Revisions</th>
-            </tr>
-            {{# texts }}
-            <tr>
-                <td>{{desc}}</td> <td>{{numRevisions}}</td>
-            </tr>
-            {{/ texts }}
+        <table class="table table-bordered table-striped table-condensed">
+            <thead>
+                <tr>
+                    <th>Description</th> <th>Revisions</th> <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{# texts }}
+                <tr>
+                    <td>{{desc}}</td> <td>{{numRevisions}}</td> <td>{{created}}</td>
+                </tr>
+                {{/ texts }}
+                {{^ texts }}
+                <tr class="error">
+                    <td colspan="3"> None found. Why not <a href="/#/submit">write one?</a> </td>
+                </tr>
+                {{/ texts }}
+            </tbody>
         </table>
     </script> <!-- /#texts -->
 
