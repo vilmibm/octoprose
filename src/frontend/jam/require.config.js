@@ -11,6 +11,11 @@ var jam = {
             "main": "backbone-relational.js"
         },
         {
+            "name": "store",
+            "location": "jam/store",
+            "main": "store"
+        },
+        {
             "name": "md5",
             "location": "jam/md5",
             "main": "md5.js"
@@ -73,6 +78,11 @@ if (typeof require !== "undefined" && require.config) {
             "main": "backbone-relational.js"
         },
         {
+            "name": "store",
+            "location": "jam/store",
+            "main": "store"
+        },
+        {
             "name": "md5",
             "location": "jam/md5",
             "main": "md5.js"
@@ -132,6 +142,11 @@ else {
             "name": "backbone-rel",
             "location": "jam/backbone-rel",
             "main": "backbone-relational.js"
+        },
+        {
+            "name": "store",
+            "location": "jam/store",
+            "main": "store"
         },
         {
             "name": "md5",
