@@ -88,6 +88,19 @@
         <!-- TODO revision list -->
         <p>{{content}}</p>
     </div>
+    <script type="mustache" id="texts">
+        <table class="table">
+            <tr>
+                <th>description</th> <th>revisions</th>
+            </tr>
+            {{# texts }}
+            <tr>
+                <td>{{desc}}</td> <td>{{numRevisions}}</td>
+            </tr>
+            {{/ texts }}
+        </table>
+    </script>
+
 
     <div id="auth" style="display:none">
         <p class="muted">log in</p>
