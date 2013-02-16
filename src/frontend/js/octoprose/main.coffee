@@ -62,7 +62,8 @@ define ['jquery', 'underscore', 'backbone', 'md5', 'cookie', 'hogan', 'backbone-
             $('#leftbar').hide()
 
             @editorView = new EditorView(el:$('#editor').clone())
-            $('#center').append @editorView.$el
+            $('#center').append(@editorView.$el).show()
+
             @editorView.render()
             @editorView.delegateEvents @editorView.events
             @editorView.on 'new', (slug) => @navigate "peruse/text/#{slug}", trigger:true
