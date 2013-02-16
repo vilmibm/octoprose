@@ -2020,6 +2020,11 @@ var jam = {
             "main": "underscore.js"
         },
         {
+            "name": "moment",
+            "location": "jam/moment",
+            "main": "moment.js"
+        },
+        {
             "name": "cookie",
             "location": "jam/cookie",
             "main": "cookie.js"
@@ -2087,6 +2092,11 @@ if (typeof require !== "undefined" && require.config) {
             "main": "underscore.js"
         },
         {
+            "name": "moment",
+            "location": "jam/moment",
+            "main": "moment.js"
+        },
+        {
             "name": "cookie",
             "location": "jam/cookie",
             "main": "cookie.js"
@@ -2151,6 +2161,11 @@ else {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
+        },
+        {
+            "name": "moment",
+            "location": "jam/moment",
+            "main": "moment.js"
         },
         {
             "name": "cookie",
