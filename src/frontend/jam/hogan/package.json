@@ -1,0 +1,27 @@
+{
+  "name": "hogan",
+  "version": "2.0.0",
+  "description": "A compiler for the Mustache templating language",
+  "homepage": "http://twitter.github.com/hogan.js/",
+  "keywords": [
+    "template",
+    "mustache"
+  ],
+  "licenses": [
+    {
+      "type": "Apache",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "git", 
+      "url": "https://github.com/twitter/hogan.js"
+    }
+  ],
+  "github": "https://github.com/twitter/hogan.js",
+  "main": "hogan.js",
+  "shim": {
+    "exports": "hogan"
+  }
+}

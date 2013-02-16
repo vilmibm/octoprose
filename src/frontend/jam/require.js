@@ -2020,6 +2020,11 @@ var jam = {
             "main": "cookie.js"
         },
         {
+            "name": "hogan",
+            "location": "jam/hogan",
+            "main": "hogan.js"
+        },
+        {
             "name": "jquery",
             "location": "jam/jquery",
             "main": "dist/jquery.js"
@@ -2041,6 +2046,9 @@ var jam = {
         },
         "underscore": {
             "exports": "_"
+        },
+        "hogan": {
+            "exports": "hogan"
         }
     }
 };
@@ -2074,6 +2082,11 @@ if (typeof require !== "undefined" && require.config) {
             "main": "cookie.js"
         },
         {
+            "name": "hogan",
+            "location": "jam/hogan",
+            "main": "hogan.js"
+        },
+        {
             "name": "jquery",
             "location": "jam/jquery",
             "main": "dist/jquery.js"
@@ -2094,6 +2107,9 @@ if (typeof require !== "undefined" && require.config) {
         },
         "underscore": {
             "exports": "_"
+        },
+        "hogan": {
+            "exports": "hogan"
         }
     }
 });
@@ -2127,6 +2143,11 @@ else {
             "main": "cookie.js"
         },
         {
+            "name": "hogan",
+            "location": "jam/hogan",
+            "main": "hogan.js"
+        },
+        {
             "name": "jquery",
             "location": "jam/jquery",
             "main": "dist/jquery.js"
@@ -2147,6 +2168,9 @@ else {
         },
         "underscore": {
             "exports": "_"
+        },
+        "hogan": {
+            "exports": "hogan"
         }
     }
 };
