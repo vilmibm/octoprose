@@ -61,7 +61,7 @@ app.get '/', (req, res, next) -> res.rend 'index.html'
 
 app.get '/text/:slug', (q, s, n) ->
     slug = q.params.slug
-    text = Text.find slug:slug, (err, doc) ->
+    text = Text.findOne(slug:slug).populate('revisions').exec (err, doc) ->
         return n new DBError err if err
         return n new NotFoundError slug unless doc
         s.send doc
