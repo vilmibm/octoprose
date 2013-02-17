@@ -11,10 +11,11 @@ reqs = [
     'cookie'
     'hogan'
     'store'
+    'moment'
     'backbone-rel'
     'js/bootstrap/bootstrap.js'
 ]
-define reqs, ($, _, Backbone, md5, cookie, hogan, store) ->
+define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
     slugify = (d) -> md5.hex(d + String(Date.now()))
     authed = cookie.get.bind cookie, 'octoauth'
     getCurrentUser = -> new User(store.get 'user')
@@ -148,6 +149,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store) ->
                 texts: @collection.map (text) -> {
                     desc: truncate(100, text.get('desc'))
                     numRevisions: text.get('revisions').length
+                    created: moment(text.get('created')).fromNow()
                 }
             html = @template.render context
             return @$el.html html
