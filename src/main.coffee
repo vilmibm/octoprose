@@ -112,6 +112,7 @@ app.post '/signup', (req, res, next) ->
     _(user).extend _(req.body).pick(fields)
 
     user.save (e) ->
+        # TODO log them in
         return next new DBError(e) if e
         res.send user.toJSON()
 

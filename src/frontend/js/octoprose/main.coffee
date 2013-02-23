@@ -110,11 +110,12 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         account_documents: ->
             $('#center, #rightbar, #leftbar').empty().hide()
             $('#leftbar').html($('#accountBar').text()).show()
-            # store.set 'userTexts', [{desc:'hello', revisions:[1,2,3]}]
-            userTexts = new Texts(store.get 'userTexts')
-            @listView = new TextsView collection:userTexts, template: tmpl('texts')
-            $('#center').append(@listView.$el).show()
-            @listView.render().show()
+            userTexts = new (Texts.extend url: '/currentUserTexts')
+            unless @userTextsView
+                @userTextsView = new TextsView collection:userTexts, template: tmpl('texts')
+            @userTextsView.render().hide()
+            userTexts.fetch(success:=>@userTextsView.$el.show())
+            $('#center').append(@userTextsView.$el).show()
 
         account_suggestions: ->
         account_profile: ->
@@ -143,6 +144,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     TextsView = Backbone.View.extend
         initialize: ({@template}) ->
+            @collection.on('reset', @render.bind @)
         render: ->
             truncate = (n, s) -> if s.length > n then "#{s[..n]}..." else s
             context =
