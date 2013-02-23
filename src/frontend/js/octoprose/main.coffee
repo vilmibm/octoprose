@@ -145,6 +145,9 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
     TextsView = Backbone.View.extend
         initialize: ({@template}) ->
             @collection.on('reset', @render.bind @)
+        events:
+            'click button.refresh': 'refresh'
+        refresh: -> @collection.fetch()
         render: ->
             truncate = (n, s) -> if s.length > n then "#{s[..n]}..." else s
             context =
