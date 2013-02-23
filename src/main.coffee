@@ -112,9 +112,11 @@ app.post '/signup', (req, res, next) ->
     _(user).extend _(req.body).pick(fields)
 
     user.save (e) ->
-        # TODO log them in
         return next new DBError(e) if e
-        res.send user.toJSON()
+        req.login user, (err) ->
+            return next(err) if err
+            res.send user.toJSON()
+        #res.send user.toJSON()
 
 app.get '/logout', (req, res, next) ->
     req.logout()

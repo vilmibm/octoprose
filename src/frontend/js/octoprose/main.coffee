@@ -66,11 +66,6 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             @authView.delegateEvents(@authView.events)
             @authView.on 'login', (userData) =>
                 setCurrentUser userData
-                $.ajax
-                    url: '/currentUserTexts'
-                    async: false
-                    dataType: 'json'
-                    success: (texts) => store.set 'userTexts', texts
                 cookie.set 'octoauth', 'true'
                 @navigate 'submit', trigger:true
             @authView.on 'signup', =>
@@ -110,11 +105,11 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         account_documents: ->
             $('#center, #rightbar, #leftbar').empty().hide()
             $('#leftbar').html($('#accountBar').text()).show()
-            userTexts = new (Texts.extend url: '/currentUserTexts')
             unless @userTextsView
+                userTexts = new (Texts.extend url: '/currentUserTexts')
                 @userTextsView = new TextsView collection:userTexts, template: tmpl('texts')
             @userTextsView.render().hide()
-            userTexts.fetch(success:=>@userTextsView.$el.show())
+            @userTextsView.collection.fetch(success:=>@userTextsView.$el.show())
             $('#center').append(@userTextsView.$el).show()
 
         account_suggestions: ->
