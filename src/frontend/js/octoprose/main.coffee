@@ -1,8 +1,3 @@
-# TODO
-# What to do when a new thing is submitted? listen for such an event and update
-# what is in cache? keep an app-global collection for the current user's texts,
-# mutate it?
-
 reqs = [
     'jquery'
     'underscore'
@@ -77,13 +72,17 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             $('#leftbar, #center, #rightbar').empty()
             $('#leftbar').hide()
 
-            @editorView = new EditorView(template:tmpl('editor'))
-            $('#center').append(@editorView.$el).show()
+            unless @editorPanelView
+                @editorPanelView = new EditorPanelView(template:tmpl('editorPanel'))
+                @editorPanelView.render()
 
-            @editorView.render()
-            @editorView.delegateEvents @editorView.events
-            @editorView.on 'new', (slug) => @navigate "peruse/text/#{slug}", trigger:true
-            $('#rightbar').text('SETTINGS').show()
+            unless @editorView
+                @editorView = new EditorView(template:tmpl('editor'))
+                @editorView.delegateEvents @editorView.events
+                @editorView.on 'new', (slug) => @navigate "peruse/text/#{slug}", trigger:true
+                @editorView.render()
+            $('#center').append(@editorView.$el).show()
+            $('#rightbar').append(@editorPanelView.$el).show()
         peruse: ->
             if not authed()
                 return @navigate '/', trigger:true
@@ -152,8 +151,13 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
                     created: moment(text.get('created')).fromNow()
                 }
             html = @template.render context
-            return @$el.html html
+            @$el.html html
 
+    EditorPanelView = Backbone.View.extend
+        initialize: ({@template}) ->
+        render: ->
+            html = @template.render()
+            @$el.html html
     EditorView = Backbone.View.extend
         initialize: ({@template}) ->
         events:
