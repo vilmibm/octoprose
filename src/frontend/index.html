@@ -158,31 +158,29 @@ Keffiyeh next level gluten-free umami fingerstache terry richardson post-ironic 
     </script> <!-- /#textComments -->
 
     <script type="text/mustache" id="editorPanel">
-        <div data-spy="affix" class="well well-small editorPanel">
-            <h4>Meta</h4>
+        <div data-spy="affix" class="well well-small editorPanel affix-top">
             <p>
-                <ul>
-                    <li>title</li>
-                    <li>description</li>
-                    <li>visibility</li>
-                </ul>
+                <button class="btn btn-mini"><i class="icon-lock"></i>Locked</button>
+                <button class="btn btn-mini">Save New Revision</button>
+                <div class="btn-group" data-toggle="buttons-radio">
+                    <button type="button" class="btn btn-mini active"><i class="icon-eye-close"></i> Private</button>
+                    <button type="button" class="btn btn-mini "><i class="icon-eye-open"></i> Public</button>
+                </div>
             </p>
-            <h4>Controls</h4>
             <p>
-                <button class="button"><i class="icon-lock"></i>Locked</button>
-                <button class="button">Save New Revision</button>
+                <input type="text" placeholder="Click to add a title" /><br />
+                <textarea cols="100" rows="2" class="muted">Click to add a description</textarea>
             </p>
-            <h4>Comments</h4>
             <p>
-                <ul>
-                    <li>0 suggestions</li>
-                    <li><i class="icon-arrow-left"></i> View general comments</li>
-                </ul>
+                <button class="btn btn-mini" disabled="true"><i class="icon-arrow-down"></i></button>
+                <button class="btn btn-mini" disabled="true"><i class="icon-arrow-up"></i></button>
+                0 suggestions
             </p>
-            <h4>Revisions</h4>
+            <p>
+                <a href="#">0 comments</a>
             <p>
                 Select revision:
-                <select>
+                <select class="input-mini">
                     <option>1</option>
                     <option>2</option>
                 </select>
