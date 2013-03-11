@@ -152,7 +152,12 @@
     <script type="text/mustache" id="editorPanel">
         <div data-spy="affix" class="well well-small editorPanel affix-top">
             <p>
-                <button class="btn btn-mini"><i class="icon-lock"></i>Locked</button>
+                {{#text.locked}}
+                <button class="btn btn-mini unlock"><i class="icon-lock"></i>Locked</button>
+                {{/text.locked}}
+                {{^text.locked}}
+                <button class="btn btn-mini lock"><i class="icon-pencil"></i>Unlocked</button>
+                {{/text.locked}}
                 <button class="btn btn-mini">Save New Revision</button>
                 <div class="btn-group" data-toggle="buttons-radio">
                     <button type="button" class="btn btn-mini active"><i class="icon-eye-close"></i> Private</button>
@@ -160,7 +165,7 @@
                 </div>
             </p>
             <p>
-                <input type="text" name="title" placeholder="Click to add a title" /><br />
+                <input type="text" name="title" {{^text.title}}placeholder="Click to add a title"{{/text.title}} {{#text.title}}value="{{text.title}}"{{/text.title}}/><br />
                 <textarea cols="100" name="description" rows="2" class="muted">Click to add a description</textarea>
             </p>
             <p>

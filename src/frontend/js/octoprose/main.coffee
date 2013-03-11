@@ -165,10 +165,17 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     EditorPanelView = Backbone.View.extend
         initialize: ({@template}) ->
+            @model.on 'change:locked', @render.bind(@)
         events:
             'input input[name=title]': 'changeTitle'
             'input textarea[name=description]': 'changeDescription'
             'click textarea[name=description]': 'clearDescription'
+            'click button.lock': 'lock'
+            'click button.unlock': 'unlock'
+        unlock: ->
+            @model.set 'locked', false
+        lock: ->
+            @model.set 'locked', true
         changeTitle: (e) ->
             @model.set('title', @$(e.target).val())
         changeDescription: (e) ->
@@ -176,10 +183,11 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         clearDescription: (e) ->
             $ta = @$(e.target)
             return unless $ta.hasClass 'muted'
-            $ta.text('')
-            $ta.removeClass('muted')
+            $ta.text('').removeClass('muted')
         render: ->
-            html = @template.render()
+            context =
+                text: @model.toJSON()
+            html = @template.render context
             @$el.html html
 
     EditorView = Backbone.View.extend
