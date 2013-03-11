@@ -67,20 +67,30 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
                 cookie.set 'octoauth', 'true'
                 @navigate 'account', trigger:true
         submit: ->
+            # This route is a shortcut for creating a new document and working
+            # on it.
             if not authed()
                 return @navigate('/', trigger:true)
             $('#leftbar, #center, #rightbar').empty()
             $('#leftbar').hide()
 
+            # Always make a new document when clicking submit.
+            text = new Text
+
             unless @editorPanelView
-                @editorPanelView = new EditorPanelView(template:tmpl('editorPanel'))
+                @editorPanelView = new EditorPanelView(template:tmpl('editorPanel'),model:text)
                 @editorPanelView.render()
+            else
+                @editorPanelView.model = text
 
             unless @editorView
-                @editorView = new EditorView(template:tmpl('editor'))
+                @editorView = new EditorView(template:tmpl('editor'), model:text)
                 @editorView.delegateEvents @editorView.events
                 @editorView.on 'new', (slug) => @navigate "peruse/text/#{slug}", trigger:true
                 @editorView.render()
+            else
+                @editorPanelView.model = text
+
             $('#center').append(@editorView.$el).show()
             $('#rightbar').append(@editorPanelView.$el).show()
         peruse: ->
