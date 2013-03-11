@@ -286,14 +286,6 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     window.Revision = Backbone.RelationalModel.extend
         # TODO ranges
-        relations: [{
-            type: 'HasOne'
-            key: 'text'
-            relatedModel: 'Text'
-            reverseRelation: {
-                key: 'revisions'
-            }
-        }]
         defaults:
             idx: 1
             content: ''
