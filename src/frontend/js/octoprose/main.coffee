@@ -185,8 +185,12 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
     EditorView = Backbone.View.extend
         initialize: ({@template}) ->
         events:
-            'submit form': 'save'
+            'input p.editor': 'editMade'
+        editMade: (e) ->
+            newText = @$(e.target).text()
+            @model.updateText(newText)
         save: (e) ->
+            # TODO DEPRECATED
             e.preventDefault()
             data = f2o @$('form')
             text = new Text
@@ -251,7 +255,21 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             reverseRelation: {
                 key: 'texts'
             }
+        }, {
+            type: 'HasMany'
+            key: 'revisions'
+            relatedModel: 'Revision'
+            reverseRelation: {
+                type: 'HasOne'
+                key: 'text'
+            }
         }],
+        updateText: (newText) ->
+            revisions = @get 'revisions'
+            currentRevision = @get('currentRevision') or 1
+            if revisions.length is 0
+                @set 'revisions', new Revision
+            revisions.filter((r) -> r.get('idx') is currentRevision).pop().set 'content', newText
         sync: (method, text) ->
             if method isnt 'read'
                 return Backbone.sync.apply(Backbone, arguments)
