@@ -165,9 +165,23 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     EditorPanelView = Backbone.View.extend
         initialize: ({@template}) ->
+        events:
+            'input input[name=title]': 'changeTitle'
+            'input textarea[name=description]': 'changeDescription'
+            'click textarea[name=description]': 'clearDescription'
+        changeTitle: (e) ->
+            @model.set('title', @$(e.target).val())
+        changeDescription: (e) ->
+            @model.set('desc', @$(e.target).text())
+        clearDescription: (e) ->
+            $ta = @$(e.target)
+            return unless $ta.hasClass 'muted'
+            $ta.text('')
+            $ta.removeClass('muted')
         render: ->
             html = @template.render()
             @$el.html html
+
     EditorView = Backbone.View.extend
         initialize: ({@template}) ->
         events:
