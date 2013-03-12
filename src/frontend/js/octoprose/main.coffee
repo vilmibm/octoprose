@@ -191,9 +191,11 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             @model.on('change:locked', @render.bind(@))
         events:
             'input p.editor': 'editMade'
+            'click p.editor': 'selectPlaceholder'
         editMade: (e) ->
             newText = @$(e.target).text()
             @model.updateContent(newText)
+        selectPlaceholder: -> document.execCommand('selectAll') unless @model.getContent()
         render: ->
             textObject = @model.toJSON()
             textObject.content = @model.getContent()
