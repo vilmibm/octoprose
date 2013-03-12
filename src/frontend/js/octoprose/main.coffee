@@ -169,18 +169,14 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         events:
             'input input[name=title]': 'changeTitle'
             'input textarea[name=description]': 'changeDescription'
-            'click textarea[name=description]': 'clearDescription'
+            'click textarea[name=description]': 'clearDescriptionPlaceholder'
             'click button.lock': 'lock'
             'click button.unlock': 'unlock'
-        unlock: ->
-            @model.set 'locked', false
-        lock: ->
-            @model.set 'locked', true
-        changeTitle: (e) ->
-            @model.set('title', @$(e.target).val())
-        changeDescription: (e) ->
-            @model.set('desc', @$(e.target).text())
-        clearDescription: (e) ->
+        unlock: -> @model.set 'locked', false
+        lock: -> @model.set 'locked', true
+        changeTitle: (e) -> @model.set('title', @$(e.target).val())
+        changeDescription: (e) -> @model.set('desc', @$(e.target).text())
+        clearDescriptionPlaceholder: (e) ->
             $ta = @$(e.target)
             return unless $ta.hasClass 'muted'
             $ta.text('').removeClass('muted')
@@ -192,11 +188,19 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     EditorView = Backbone.View.extend
         initialize: ({@template}) ->
+            @model.on('change:locked', @render.bind(@))
         events:
             'input p.editor': 'editMade'
         editMade: (e) ->
             newText = @$(e.target).text()
-            @model.updateText(newText)
+            @model.updateContent(newText)
+        render: ->
+            textObject = @model.toJSON()
+            textObject.content = @model.getContent()
+            context =
+                text: textObject
+            html = @template.render context
+            @$el.html html
         save: (e) ->
             # TODO DEPRECATED
             e.preventDefault()
@@ -212,7 +216,6 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             text.get('revisions').add revision
             text.on 'sync', => @trigger 'new', text.get('slug')
             text.save()
-        render: -> @$el.html(@template.render())
 
     RecentView = Backbone.View.extend
         initialize: ({@template}) ->
@@ -272,7 +275,12 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
                 key: 'text'
             }
         }],
-        updateText: (newText) ->
+        getContent: ->
+            currentRevision = @get('currentRevision') or 1
+            revisions = @get('revisions')
+            return undefined if revisions.length is 0
+            revisions.filter((r) -> r.get('idx') is currentRevision).pop().get 'content'
+        updateContent: (newText) ->
             revisions = @get 'revisions'
             currentRevision = @get('currentRevision') or 1
             if revisions.length is 0
