@@ -1,5 +1,8 @@
-logging in/out work. now what?
+things on the editor interface are going well. though it is slow i am very happy with how things are shaping up.
 
-how about model work...
+i think next i want drafts support; i'm wondering how to do that. perhaps save
+new revision "finishes" the "current" revision and then starts a new one; the
+current editing text is always saved in the current "WIP" revision. i like
+that.
 
-basic item upload + listing in account.
+Going to let my computer sleep for a bit and read. I'll let that gestate.
