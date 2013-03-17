@@ -80,8 +80,13 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             text = new Text
 
             unless @editorPanelView
-                @editorPanelView = new EditorPanelView(template:tmpl('editorPanel'),model:text)
+                @editorPanelView = new EditorPanelView(template:tmpl('editorPanel'))
                 @editorPanelView.render()
+
+            unless @metaControlsView
+                @metaControlsView = new MetaControlsView(template:tmpl('metaControls'),model:text)
+                @metaControlsView.render()
+                @editorPanelView.append @metaControlsView
             else
                 @editorPanelView.model = text
 
@@ -91,7 +96,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
                 @editorView.on 'new', (slug) => @navigate "peruse/text/#{slug}", trigger:true
                 @editorView.render()
             else
-                @editorPanelView.model = text
+                @editorView.model = text
 
             $('#center').append(@editorView.$el).show()
             $('#rightbar').append(@editorPanelView.$el).show()
@@ -167,6 +172,18 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     EditorPanelView = Backbone.View.extend
         initialize: ({@template}) ->
+        events:
+            'click .hide': 'hide'
+            'click .show': 'show'
+        hide: -> # TODO
+        show: -> # TODO
+        append: (view) -> @$('div:first').append(view.$el)
+        render: ->
+            html = @template.render()
+            @$el.html html
+
+    MetaControlsView = Backbone.View.extend
+        initialize: ({@template}) ->
             @model.on 'change:locked', @render.bind(@)
         events:
             'input input[name=title]': 'changeTitle'
@@ -174,8 +191,8 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             'click textarea[name=description]': 'clearDescriptionPlaceholder'
             'click button.lock': 'lock'
             'click button.unlock': 'unlock'
-        unlock: -> @model.set 'locked', false
-        lock: -> @model.set 'locked', true
+        unlock: -> console.log('unlocking'); @model.set 'locked', false
+        lock: -> console.log('unlocking');@model.set 'locked', true
         changeTitle: (e) -> @model.set('title', @$(e.target).val())
         changeDescription: (e) -> @model.set('desc', @$(e.target).text())
         clearDescriptionPlaceholder: (e) ->

@@ -157,7 +157,11 @@
     </script> <!-- /#textComments -->
 
     <script type="text/mustache" id="editorPanel">
-        <div data-spy="affix" class="well well-small editorPanel affix-top">
+        <div data-spy="affix" class="editorPanel well well-small affix-top">
+        </div>
+    </script> <!-- /#metaControls -->
+    <script type="text/mustache" id="metaControls">
+        <div class="metaControls">
             <p>
                 {{#text.locked}}
                 <button class="btn btn-mini unlock"><i class="icon-lock"></i>Locked</button>
@@ -175,6 +179,7 @@
                 <input type="text" name="title" {{^text.title}}placeholder="Click to add a title"{{/text.title}} {{#text.title}}value="{{text.title}}"{{/text.title}}/><br />
                 <textarea cols="100" name="description" rows="2" class="muted">Click to add a description</textarea>
             </p>
+            <!--
             <p>
                 <button class="btn btn-mini" disabled="true"><i class="icon-arrow-down"></i></button>
                 <button class="btn btn-mini" disabled="true"><i class="icon-arrow-up"></i></button>
@@ -189,7 +194,8 @@
                     <option>2</option>
                 </select>
             </p>
-        </div>
+            -->
+        </div> <!-- /.metaControls -->
     </script>
 
     <script type="text/mustache" id="accountBar">
