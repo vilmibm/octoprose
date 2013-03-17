@@ -18,6 +18,8 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
          store.set('user', data)
          return new User(data)
     unsetCurrentUser = -> store.remove 'user'
+    newlineToBr = (s) -> if s then s.replace(/\n/g, '<br/>') else s
+
     tmpl = (name) -> hogan.compile $("##{name}").text()
 
     Router = Backbone.Router.extend
@@ -193,9 +195,10 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             'input p.editor': 'editMade'
             'click p.editor': 'selectPlaceholder'
         editMade: (e) ->
-            newText = @$(e.target).text()
+            newText = newlineToBr @$(e.target).text()
             @model.updateContent(newText)
-        selectPlaceholder: -> document.execCommand('selectAll') unless @model.getContent()
+        selectPlaceholder: ->
+            document.execCommand('selectAll') unless @model.getContent()
         render: ->
             textObject = @model.toJSON()
             textObject.content = @model.getContent()
