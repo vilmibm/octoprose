@@ -98,6 +98,11 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             else
                 @editorView.model = text
 
+            # TODO i wonder if rightbar should be affixed? as long as
+            # it is being done manually?  maybe better to just keep it
+            # totally manual
+            @editorPanelView.$el.affix()
+
             $('#center').append(@editorView.$el).show()
             $('#rightbar').append(@editorPanelView.$el).show()
         peruse: ->
@@ -177,7 +182,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             'click .show': 'show'
         hide: -> # TODO
         show: -> # TODO
-        append: (view) -> @$('div:first').append(view.$el)
+        append: (view) -> @$('div.editorPanel').append(view.$el)
         render: ->
             html = @template.render()
             @$el.html html
