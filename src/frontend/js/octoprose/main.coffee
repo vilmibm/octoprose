@@ -25,6 +25,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
     Router = Backbone.Router.extend
         initialize: ->
             @route /^\/?$/, 'default', @default
+            @views = {}
         routes:
             submit: 'submit'
 
@@ -39,13 +40,13 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         default: ->
             if authed()
                 return @navigate('account', trigger: true)
-            @authView = new AuthView(template:tmpl('auth'))
-            @recentView = new RecentView(template:tmpl('recent'))
+            @views.auth = new AuthView(template:tmpl('auth'))
+            @views.recent = new RecentView(template:tmpl('recent'))
 
             $('#rightbar')
                 .empty()
                 .show()
-                .append(@recentView.$el)
+                .append(@views.recent.$el)
 
             $('#center')
                 .empty()
@@ -55,17 +56,17 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             $('#leftbar')
                 .empty()
                 .show()
-                .append(@authView.$el)
-            @recentView.render()
+                .append(@views.auth.$el)
+            @views.recent.render()
 
-            @authView.render()
+            @views.auth.render()
             # this should be automatic. fucker.
-            @authView.delegateEvents(@authView.events)
-            @authView.on 'login', (userData) =>
+            @views.auth.delegateEvents(@views.auth.events)
+            @views.auth.on 'login', (userData) =>
                 setCurrentUser userData
                 cookie.set 'octoauth', 'true'
                 @navigate 'submit', trigger:true
-            @authView.on 'signup', =>
+            @views.auth.on 'signup', =>
                 cookie.set 'octoauth', 'true'
                 @navigate 'account', trigger:true
         submit: ->
@@ -79,32 +80,39 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             # Always make a new document when clicking submit.
             text = new Text
 
-            unless @editorPanelView
-                @editorPanelView = new EditorPanelView(template:tmpl('editorPanel'))
-                @editorPanelView.render()
+            unless @views.editorPanel
+                @views.editorPanel = new EditorPanelView(template:tmpl('editorPanel'))
+                @views.editorPanel.render()
 
-            unless @metaControlsView
-                @metaControlsView = new MetaControlsView(template:tmpl('metaControls'),model:text)
-                @metaControlsView.render()
-                @editorPanelView.append @metaControlsView
-            else
-                @editorPanelView.model = text
+            editorPanel = @views.editorPanel
 
-            unless @editorView
-                @editorView = new EditorView(template:tmpl('editor'), model:text)
-                @editorView.delegateEvents @editorView.events
-                @editorView.on 'new', (slug) => @navigate "peruse/text/#{slug}", trigger:true
-                @editorView.render()
+            unless @views.metaControls
+                @views.metaControls = new MetaControlsView(template:tmpl('metaControls'),model:text)
+                @views.metaControls.render()
+                editorPanel.append @views.metaControls
             else
-                @editorView.model = text
+                editorPanel.model = text
+
+            unless @suggestionNavView
+                @views.suggestionNav = new SuggestionNavView(template:tmpl('suggestionNav'),model:text)
+                @views.suggestionNav.render()
+                editorPanel.append @views.suggestionNav
+
+            unless @views.editor
+                @views.editor = new EditorView(template:tmpl('editor'), model:text)
+                @views.editor.delegateEvents @views.editor.events
+                @views.editor.on 'new', (slug) => @navigate "peruse/text/#{slug}", trigger:true
+                @views.editor.render()
+            else
+                @views.editor.model = text
 
             # TODO i wonder if rightbar should be affixed? as long as
             # it is being done manually?  maybe better to just keep it
             # totally manual
-            @editorPanelView.$el.affix()
+            editorPanel.$el.affix()
 
-            $('#center').append(@editorView.$el).show()
-            $('#rightbar').append(@editorPanelView.$el).show()
+            $('#center').append(@views.editor.$el).show()
+            $('#rightbar').append(editorPanel.$el).show()
         peruse: ->
             if not authed()
                 return @navigate '/', trigger:true
@@ -112,10 +120,10 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             text = new Text
             text.set('slug', slug)
             $('#center, #rightbar, #leftbar').empty().hide()
-            @textView = new TextView(model:text, template: tmpl('text'))
-            @textView.delegateEvents @textView.events
-            $('#center').append(@textView.$el).show()
-            text.on 'change', => @textView.render().show()
+            @views.text = new TextView(model:text, template: tmpl('text'))
+            @views.text.delegateEvents @views.text.events
+            $('#center').append(@views.text.$el).show()
+            text.on 'change', => @views.text.render().show()
             text.fetch()
         account: ->
             if not authed()
@@ -126,12 +134,12 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         account_documents: ->
             $('#center, #rightbar, #leftbar').empty().hide()
             $('#leftbar').html($('#accountBar').text()).show()
-            unless @userTextsView
+            unless @views.userTexts
                 userTexts = new (Texts.extend url: '/currentUserTexts')
-                @userTextsView = new TextsView collection:userTexts, template: tmpl('texts')
-            @userTextsView.render().hide()
-            @userTextsView.collection.fetch(success:=>@userTextsView.$el.show())
-            $('#center').append(@userTextsView.$el).show()
+                @views.userTexts = new TextsView collection:userTexts, template: tmpl('texts')
+            @views.userTexts.render().hide()
+            @views.userTexts.collection.fetch(success:=>@views.userTexts.$el.show())
+            $('#center').append(@views.userTexts.$el).show()
 
         account_suggestions: ->
         account_profile: ->
@@ -183,6 +191,13 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         hide: -> # TODO
         show: -> # TODO
         append: (view) -> @$('div.editorPanel').append(view.$el)
+        render: ->
+            html = @template.render()
+            @$el.html html
+
+    SuggestionNavView = Backbone.View.extend
+        initialize: ({@template}) ->
+        events: {}
         render: ->
             html = @template.render()
             @$el.html html
