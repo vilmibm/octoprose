@@ -93,11 +93,6 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             else
                 editorPanel.model = text
 
-            unless @suggestionNavView
-                @views.suggestionNav = new SuggestionNavView(template:tmpl('suggestionNav'),model:text)
-                @views.suggestionNav.render()
-                editorPanel.append @views.suggestionNav
-
             unless @views.editor
                 @views.editor = new EditorView(template:tmpl('editor'), model:text)
                 @views.editor.delegateEvents @views.editor.events

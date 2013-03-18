@@ -167,7 +167,22 @@
           <button class="btn btn-mini" disabled="true"><i class="icon-arrow-up"></i></button>
           0 suggestions
         </p>
-    </script>
+    </script> <!-- /#suggestionNav -->
+
+    <script type="text/mustache" id="fileNav">
+        <!-- TODO docs listing -->
+        <p>
+            Select revision:
+            <select class="input-mini">
+                <option>1</option>
+                <option>2</option>
+            </select>
+        </p>
+    </script> <!-- /#fileNav -->
+
+    <script type="text/mustache" id="commentNav">
+        <p>0 Comments </p>
+    </script> <!-- /#commentNav -->
 
     <script type="text/mustache" id="metaControls">
         <!-- TODO i don't think i need these inner divs; they're just
@@ -190,17 +205,6 @@
                 <input type="text" name="title" {{^text.title}}placeholder="Click to add a title"{{/text.title}} {{#text.title}}value="{{text.title}}"{{/text.title}}/><br />
                 <textarea cols="100" name="description" rows="2" class="muted">Click to add a description</textarea>
             </p>
-            <!--
-            <p>
-                <a href="#">0 comments</a>
-            <p>
-                Select revision:
-                <select class="input-mini">
-                    <option>1</option>
-                    <option>2</option>
-                </select>
-            </p>
-            -->
         </div> <!-- /.metaControls -->
     </script>
 
