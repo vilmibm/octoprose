@@ -11,7 +11,6 @@ reqs = [
     'js/bootstrap/bootstrap.js'
 ]
 define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
-    slugify = (d) -> md5.hex(d + String(Date.now()))
     authed = cookie.get.bind cookie, 'octoauth'
     getCurrentUser = -> new User(store.get 'user')
     setCurrentUser = (data) ->
@@ -30,7 +29,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             submit: 'submit'
 
             peruse: 'peruse'
-            'peruse/text/:slug': 'peruse_text'
+            'peruse/text/:uuid': 'peruse_text'
 
             account: 'account'
             'account/documents': 'account_documents',
@@ -96,7 +95,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             unless @views.editor
                 @views.editor = new EditorView(template:tmpl('editor'), model:text)
                 @views.editor.delegateEvents @views.editor.events
-                @views.editor.on 'new', (slug) => @navigate "peruse/text/#{slug}", trigger:true
+                @views.editor.on 'new', (uuid) => @navigate "peruse/text/#{uuid}", trigger:true
                 @views.editor.render()
             else
                 @views.editor.model = text
@@ -111,9 +110,9 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         peruse: ->
             if not authed()
                 return @navigate '/', trigger:true
-        peruse_text: (slug) ->
+        peruse_text: (uuid) ->
             text = new Text
-            text.set('slug', slug)
+            text.set('uuid', uuid)
             $('#center, #rightbar, #leftbar').empty().hide()
             @views.text = new TextView(model:text, template: tmpl('text'))
             @views.text.delegateEvents @views.text.events
@@ -203,17 +202,22 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         events:
             'input input[name=title]': 'changeTitle'
             'input textarea[name=description]': 'changeDescription'
-            'click textarea[name=description]': 'clearDescriptionPlaceholder'
+            'focus textarea[name=description]': 'clearDescriptionPlaceholder'
             'click button.lock': 'lock'
             'click button.unlock': 'unlock'
+            'click button.save': 'saveNewRevision'
         unlock: -> console.log('unlocking'); @model.set 'locked', false
         lock: -> console.log('unlocking');@model.set 'locked', true
         changeTitle: (e) -> @model.set('title', @$(e.target).val())
-        changeDescription: (e) -> @model.set('desc', @$(e.target).text())
+        changeDescription: (e) -> @model.set('desc', @$(e.target).val())
         clearDescriptionPlaceholder: (e) ->
             $ta = @$(e.target)
             return unless $ta.hasClass 'muted'
-            $ta.text('').removeClass('muted')
+            $ta.val('').removeClass('muted')
+        saveNewRevision: (e) ->
+            @model.set 'uuid', 'TODO'
+            @model.saveNewRevision()
+            @model.save()
         render: ->
             context =
                 text: @model.toJSON()
@@ -228,31 +232,16 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             'click p.editor': 'selectPlaceholder'
         editMade: (e) ->
             newText = newlineToBr @$(e.target).text()
-            @model.updateContent(newText)
+            @model.set('currentWorkingText', newText)
         selectPlaceholder: ->
-            document.execCommand('selectAll') unless @model.getContent()
+            document.execCommand('selectAll') unless @model.get 'currentWorkingText'
         render: ->
             textObject = @model.toJSON()
-            textObject.content = @model.getContent()
+            textObject.content = @model.get 'currentWorkingText'
             context =
                 text: textObject
             html = @template.render context
             @$el.html html
-        save: (e) ->
-            # TODO DEPRECATED
-            e.preventDefault()
-            data = f2o @$('form')
-            text = new Text
-            u = getCurrentUser()
-            text.set('desc', data.title)
-            text.set('user', u)
-            text.set('slug', slugify(text.get('desc')))
-
-            revision = new Revision
-            revision.set('content', data.content)
-            text.get('revisions').add revision
-            text.on 'sync', => @trigger 'new', text.get('slug')
-            text.save()
 
     RecentView = Backbone.View.extend
         initialize: ({@template}) ->
@@ -312,27 +301,27 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
                 key: 'text'
             }
         }],
-        getContent: ->
-            currentRevision = @get('currentRevision') or 1
-            revisions = @get('revisions')
-            return undefined if revisions.length is 0
-            revisions.filter((r) -> r.get('idx') is currentRevision).pop().get 'content'
-        updateContent: (newText) ->
+        saveNewRevision: ->
+            newText = @get 'currentWorkingText'
             revisions = @get 'revisions'
-            currentRevision = @get('currentRevision') or 1
             if revisions.length is 0
-                @set 'revisions', new Revision
-            revisions.filter((r) -> r.get('idx') is currentRevision).pop().set 'content', newText
+                idx = 1
+            else
+                idx = revisions.last().get 'idx'
+            revision = new Revision
+                content: newText
+                idx: idx
+            @set 'revisions', revision
         sync: (method, text) ->
             if method isnt 'read'
                 return Backbone.sync.apply(Backbone, arguments)
 
-            $.getJSON("/text/#{text.get('slug')}")
+            $.getJSON("/text/#{text.get('uuid')}")
                 .success((data) ->
                     text.set data
                     text.trigger 'sync'
                 )
-                .error -> console.error text.get('slug')
+                .error -> console.error text.get('uuid')
 
         defaults:
             category: 'no category'

@@ -3,6 +3,7 @@ async = require 'async'
 express = require 'express'
 hash = require 'node_hash'
 p = require 'passport'
+uuid = require 'node-uuid'
 _ = require 'underscore'
 
 domain = process.env.OCTO_DOMAIN or 'localhost'
@@ -64,11 +65,11 @@ app.get '/currentUserTexts', ensureAuth, (q, s, n) ->
         return n new DBError err if err
         s.send docs
 
-app.get '/text/:slug', (q, s, n) ->
-    slug = q.params.slug
-    text = Text.findOne(slug:slug).populate('revisions').exec (err, doc) ->
+app.get '/text/:uuid', (q, s, n) ->
+    uuid = q.params.uuid
+    text = Text.findOne(uuid:uuid).populate('revisions').exec (err, doc) ->
         return n new DBError err if err
-        return n new NotFoundError slug unless doc
+        return n new NotFoundError uuid unless doc
         s.send doc
 
 app.post '/text', ensureAuth, (q,s,n) ->
@@ -78,7 +79,7 @@ app.post '/text', ensureAuth, (q,s,n) ->
     text._user = author
     text.category = q.body.category
     text.desc = q.body.desc
-    text.slug = q.body.slug
+    text.uuid = uuid.v4()
 
     revision = new Revision
     revision.content = q.body.revisions[0].content
@@ -89,7 +90,7 @@ app.post '/text', ensureAuth, (q,s,n) ->
         (cb) ->
             text.revisions.push(revision)
             text.save(cb)
-    ], (e, _) -> s.send({slug:text.slug})
+    ], (e, _) -> s.send({uuid:text.uuid})
 
 # auth
 app.post '/login', p.authenticate('local', {}), (q,s,n) ->
