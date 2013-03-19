@@ -215,9 +215,8 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             return unless $ta.hasClass 'muted'
             $ta.val('').removeClass('muted')
         saveNewRevision: (e) ->
-            @model.set 'uuid', 'TODO'
             @model.saveNewRevision()
-            @model.save()
+            @model.save().success ({uuid}) => @model.set 'uuid', uuid
         render: ->
             context =
                 text: @model.toJSON()
@@ -285,6 +284,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     window.Text = Backbone.RelationalModel.extend
         url: '/text'
+        idAttribute: 'uuid'
         relations: [{
             type:'HasOne'
             key:'user'
