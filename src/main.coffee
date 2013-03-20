@@ -92,6 +92,45 @@ app.post '/text', ensureAuth, (q,s,n) ->
             text.save(cb)
     ], (e, _) -> s.send({uuid:text.uuid})
 
+app.put '/text', ensureAuth, (q,s,n) ->
+    textUuid = q.body.uuid
+    newRevisionData = _(q.body.revisions).chain().sortBy('idx').last().value()
+    user = q.user
+
+    res.send 400
+
+    #Text.findById(textUuid).populate('_user').populate('revisions').run (e, text) ->
+    #    return n new DBError(e) if e
+    #    return n new NotFoundError(textUuid) unless text
+    #    if String(text._user._id) isnt String(user._id)
+    #        return n new PermError(user._id, textUuid)
+
+    #Text.findById(text_id).populate('_user').populate('revisions').run((e, text) ->
+    #    return next new DBError(e) if e
+    #    return next new NotFoundError(text_id) unless text
+    #    if String(text._user._id) isnt String(user._id)
+    #        return next new PermError(user._id, text_id)
+
+    #    last_revision = _.last(_.sortBy(text.revisions, 'idx'))
+
+    #    revision = new Revision
+    #    revision.idx =  last_revision.idx + 1
+    #    revision.content = new_text
+    #    revision._text = text
+
+    #    revision.save((e) ->
+    #        return next new DBError(e) if e
+    #        text.revisions.push(revision)
+    #        text.save((e) ->
+    #            return next new DBError(e) if e
+    #            res.send(
+    #                slug:text.slug
+    #                revision_idx:revision.idx
+    #            )
+    #        )
+    #    )
+    #)
+
 # auth
 app.post '/login', p.authenticate('local', {}), (q,s,n) ->
     s.send q.user
