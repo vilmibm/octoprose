@@ -12,7 +12,7 @@ LocalStrategy = require('passport-local').Strategy
 RedisStore = require('connect-redis')(express)
 
 # errors
-{ NotFoundError, PermError, DBError, ValidationError } = require './errors'
+{ Error, NotFoundError, PermError, DBError, ValidationError } = require './errors'
 
 # models
 models = require('./models')
