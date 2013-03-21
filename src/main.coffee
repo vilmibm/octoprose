@@ -56,33 +56,37 @@ app.engine '.html', (str) -> str
 app.set('views', "#{__dirname}/../front")
 
 # the page
-app.get '/', (req, res, next) -> res.rend 'index.html'
+app.get '/', (q, s) -> s.rend 'index.html'
 
 # data api
 
-app.get '/currentUserTexts', ensureAuth, (q, s, n) ->
+app.get '/currentUserTexts', ensureAuth, (q, s) ->
     Text.find(_user:q.user).populate('revisions').exec (err, docs) ->
-        return n new DBError err if err
+        return (new DBError err).finish(s) if err
         s.send docs
 
 app.get '/text/:uuid', (q, s, n) ->
     uuid = q.params.uuid
     text = Text.findOne(uuid:uuid).populate('revisions').exec (err, doc) ->
-        return n new DBError err if err
-        return n new NotFoundError uuid unless doc
+        return (new DBError err).finish(s) if err
+        return (new NotFoundError uuid).finish(s) unless doc
         s.send doc
 
-app.post '/text', ensureAuth, (q,s,n) ->
+app.post '/text', ensureAuth, (q,s) ->
     author = q.user
+
+    textData = q.body
 
     text = new Text
     text._user = author
-    text.category = q.body.category
-    text.desc = q.body.desc
+    # TODO category
+    text.desc = textData.desc
+    text.title = textData.title
+    text.draft = textData.currentWorkingText
     text.uuid = uuid.v4()
 
     revision = new Revision
-    revision.content = q.body.revisions[0].content
+    revision.content = textData.revisions[0].content
     revision._text = text
 
     async.series [
@@ -92,75 +96,67 @@ app.post '/text', ensureAuth, (q,s,n) ->
             text.save(cb)
     ], (e, _) -> s.send({uuid:text.uuid})
 
-app.put '/text', ensureAuth, (q,s,n) ->
-    textUuid = q.body.uuid
-    newRevisionData = _(q.body.revisions).chain().sortBy('idx').last().value()
+app.put '/text', ensureAuth, (q,s) ->
     user = q.user
+    textData = q.body
 
-    res.send 400
+    Text.findOne(textData.uuid).populate('_user').populate('revisions').exec (e, text) ->
+        return (new DBError e).finish(s) if e
+        return (new NotFoundError(textData.uuid)).finish(s) unless text
+        if String(text._user._id) isnt String(user._id)
+            return (new PermError(user._id, textData.uuid)).finish s
 
-    #Text.findById(textUuid).populate('_user').populate('revisions').run (e, text) ->
-    #    return n new DBError(e) if e
-    #    return n new NotFoundError(textUuid) unless text
-    #    if String(text._user._id) isnt String(user._id)
-    #        return n new PermError(user._id, textUuid)
+        text.uuid = textData.uuid
+        text.draft = textData.currentWorkingText
+        text.title = textData.title
+        text.desc = textData.desc
+        # TODO category
 
-    #Text.findById(text_id).populate('_user').populate('revisions').run((e, text) ->
-    #    return next new DBError(e) if e
-    #    return next new NotFoundError(text_id) unless text
-    #    if String(text._user._id) isnt String(user._id)
-    #        return next new PermError(user._id, text_id)
+        finish = (e) ->
+            return (new DBError e).finish(s) if e
+            s.send 200
 
-    #    last_revision = _.last(_.sortBy(text.revisions, 'idx'))
-
-    #    revision = new Revision
-    #    revision.idx =  last_revision.idx + 1
-    #    revision.content = new_text
-    #    revision._text = text
-
-    #    revision.save((e) ->
-    #        return next new DBError(e) if e
-    #        text.revisions.push(revision)
-    #        text.save((e) ->
-    #            return next new DBError(e) if e
-    #            res.send(
-    #                slug:text.slug
-    #                revision_idx:revision.idx
-    #            )
-    #        )
-    #    )
-    #)
+        # sync last revision if necessary
+        unless textData.revisions.length is text.revisions.length
+            newRevisionData = _(textData.revisions).chain().sortBy('idx').last().value()
+            newRevision = new Revision newRevisionData
+            newRevision._text = text
+            newRevision.save (e) ->
+                return (new DBError e).finish(s) if e
+                text.revisions.push newRevision
+                text.save finish
+        else
+            text.save finish
 
 # auth
-app.post '/login', p.authenticate('local', {}), (q,s,n) ->
+app.post '/login', p.authenticate('local', {}), (q,s) ->
     s.send q.user
 
-app.post '/signup', (req, res, next) ->
+app.post '/signup', (q, s) ->
     fields = ['username', 'email', 'password']
 
-    captcha = req.body.captcha
+    captcha = q.body.captcha
     unless captcha and captcha.toLowerCase() in ['4', 'four']
-        return next new ValidationError(captcha, 'the correct answer')
+        return (new ValidationError captcha, 'the correct answer').finish(s)
 
     required = ['username', 'email', 'password']
-    missing = _.difference(required, _(req.body).keys())
+    missing = _.difference(required, _(q.body).keys())
     if missing.length > 0
-        return next new ValidationError(required, _.difference(required, missing))
+        return (new ValidatonError(required, _.difference(required, missing))).finish s
 
     user = new User
     # TODO handle unique errors
-    _(user).extend _(req.body).pick(fields)
+    _(user).extend _(q.body).pick(fields)
 
     user.save (e) ->
-        return next new DBError(e) if e
-        req.login user, (err) ->
-            return next(err) if err
-            res.send user.toJSON()
-        #res.send user.toJSON()
+        return (new DBError e).finish(s) if e
+        q.login user, (e) ->
+            return (new Error e).finish(s) if e
+            s.send user.toJSON()
 
-app.get '/logout', (req, res, next) ->
-    req.logout()
-    res.send(200)
+app.get '/logout', (q, s) ->
+    q.logout()
+    s.send(200)
 
 app.listen 3100, domain
 console.log 'listening'
