@@ -56,9 +56,11 @@ TextSchema = new Schema(
     _user: ref 'User'
     uuid: {type:String, required:true}
     category: {type:String, default:'no category'}
+    draft: {type:String, default:''}
     #category_slug: {type:String, default:'no-category'}
     created: {type:Date}
-    desc: {type:String, required:true}
+    title: {type:String, required:true}
+    desc: {type:String}
     revisions: [ref 'Revision']
 )
 TextSchema.pre 'save', setCreated
