@@ -307,11 +307,12 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             if revisions.length is 0
                 idx = 1
             else
-                idx = revisions.last().get 'idx'
+                idx = 1 + (revisions.last().get 'idx')
             revision = new Revision
                 content: newText
                 idx: idx
-            @set 'revisions', revision
+            revisions.push revision
+            @set 'revisions', revisions
         sync: (method, text) ->
             if method isnt 'read'
                 return Backbone.sync.apply(Backbone, arguments)
