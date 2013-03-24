@@ -37,6 +37,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             'edit/:uuid': 'edit'
 
             'text/:uuid': 'text'
+            'preview/:uuid': 'preview'
 
             peruse: 'peruse'
             'peruse/:uuid': 'peruseText'
@@ -81,10 +82,12 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         text: (uuid) ->
             nav = (r) => @navigate "#{r}/#{uuid}", trigger:true
             unless authed()
-                return nav 'peruse'
+                return nav 'preview'
 
             owner uuid, (err, isOwner) ->
                 nav( if isOwner then 'edit' else 'peruse' )
+        preview: (uuid) ->
+            console.log 'PREVIEWING'
         edit: (uuid) ->
             console.log 'EDITING'
         peruseText: (uuid) ->
