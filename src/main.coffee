@@ -60,6 +60,13 @@ app.get '/', (q, s) -> s.rend 'index.html'
 
 # data api
 
+app.get '/owns/:uuid', ensureAuth, (q, s) ->
+    Text.findOne(_user:q.user, uuid:q.params.uuid).exec (err, doc) ->
+        return (new DBError err).finish(s) if err
+        return s.send {
+            isOwner: Boolean(doc)
+        }
+
 app.get '/currentUserTexts', ensureAuth, (q, s) ->
     Text.find(_user:q.user).populate('revisions').exec (err, docs) ->
         return (new DBError err).finish(s) if err

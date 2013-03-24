@@ -12,6 +12,13 @@ reqs = [
 ]
 define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
     authed = cookie.get.bind cookie, 'octoauth'
+    owner = (uuid, cb) ->
+        $.getJSON("owns/#{uuid}")
+            .success((data) ->
+                cb null, data.isOwner
+            )
+            .error cb.bind({}, 'panic')
+
     getCurrentUser = -> new User(store.get 'user')
     setCurrentUser = (data) ->
          store.set('user', data)
@@ -27,9 +34,12 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             @views = {}
         routes:
             submit: 'submit'
+            'edit/:uuid': 'edit'
+
+            'text/:uuid': 'text'
 
             peruse: 'peruse'
-            'peruse/text/:uuid': 'peruse_text'
+            'peruse/:uuid': 'peruseText'
 
             account: 'account'
             'account/documents': 'account_documents',
@@ -68,6 +78,17 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             @views.auth.on 'signup', =>
                 cookie.set 'octoauth', 'true'
                 @navigate 'account', trigger:true
+        text: (uuid) ->
+            nav = (r) => @navigate "#{r}/#{uuid}", trigger:true
+            unless authed()
+                return nav 'peruse'
+
+            owner uuid, (err, isOwner) ->
+                nav( if isOwner then 'edit' else 'peruse' )
+        edit: (uuid) ->
+            console.log 'EDITING'
+        peruseText: (uuid) ->
+            console.log 'PERUSING'
         submit: ->
             # This route is a shortcut for creating a new document and working
             # on it.
