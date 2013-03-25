@@ -21,7 +21,8 @@
   * Followed users' activity
   * activity on their texts
  * Blog with content
-  * design architecture
+  * choose provider
+  * set up a theme
  * Markdown support in the editor interface
  * Terms of service
   * evaluate IUBenda pricing
