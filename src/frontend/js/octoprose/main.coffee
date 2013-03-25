@@ -137,7 +137,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             vs.editor.render()
 
             $('#center').append(vs.editor.$el).show()
-            $('#rightbar').append(editorPanel.$el).show()
+            $('#rightbar').append(vs.panel.$el).show()
         peruse: ->
             if not authed()
                 return @navigate '/', trigger:true

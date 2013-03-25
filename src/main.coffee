@@ -3,7 +3,7 @@ async = require 'async'
 express = require 'express'
 hash = require 'node_hash'
 p = require 'passport'
-uuid = require 'node-uuid'
+node_uuid = require 'node-uuid'
 _ = require 'underscore'
 
 domain = process.env.OCTO_DOMAIN or 'localhost'
@@ -90,7 +90,7 @@ app.post '/text', ensureAuth, (q,s) ->
     text.desc = textData.desc
     text.title = textData.title
     text.draft = textData.currentWorkingText
-    text.uuid = uuid.v4()
+    text.uuid = node_uuid.v4()
 
     revision = new Revision
     revision.content = textData.revisions[0].content
