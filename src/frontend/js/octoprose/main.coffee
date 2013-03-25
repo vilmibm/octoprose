@@ -91,7 +91,25 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         edit: (uuid) ->
             console.log 'EDITING'
         peruseText: (uuid) ->
-            console.log 'PERUSING'
+            $('#leftbar, #rightbar, #center').empty()
+            $('#leftbar').hide()
+            @views.peruseText = {} unless @views.peruseText
+            text = new Text uuid:uuid
+            vs = @views.peruseText
+
+            (vs.panel = new EditorPanelView template:tmpl('editorPanel'), model: text).render()
+
+            (vs.sugNav = new SuggestionNavView template:tmpl('suggestionNav'), model: text).render()
+
+            vs.panel.append vs.sugNav
+
+            (vs.editor = new EditorView template:tmpl('editor'), model: text).render()
+
+            text.set 'lock', true
+            text.fetch()
+
+            $('#center').append(vs.editor.$el).show()
+            $('#rightbar').append(vs.panel.$el).show()
         submit: ->
             # This route is a shortcut for creating a new document and working
             # on it.
@@ -103,33 +121,22 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             # Always make a new document when clicking submit.
             text = new Text
 
-            unless @views.editorPanel
-                @views.editorPanel = new EditorPanelView(template:tmpl('editorPanel'))
-                @views.editorPanel.render()
+            @views.submit = {} unless @views.submit
+            vs = @views.submit
 
-            editorPanel = @views.editorPanel
+            vs.panel = new EditorPanelView template:tmpl('editorPanel')
+            vs.panel.render()
 
-            unless @views.metaControls
-                @views.metaControls = new MetaControlsView(template:tmpl('metaControls'),model:text)
-                @views.metaControls.render()
-                editorPanel.append @views.metaControls
-            else
-                editorPanel.model = text
+            vs.meta = new MetaControlsView template: tmpl('metaControls'), model: text
+            vs.meta.render()
+            vs.panel.append vs.meta
 
-            unless @views.editor
-                @views.editor = new EditorView(template:tmpl('editor'), model:text)
-                @views.editor.delegateEvents @views.editor.events
-                @views.editor.on 'new', (uuid) => @navigate "peruse/text/#{uuid}", trigger:true
-                @views.editor.render()
-            else
-                @views.editor.model = text
+            vs.editor = new EditorView template: tmpl('editor'), model: text
+            
+            vs.editor.delegateEvents vs.editor.events # TODO why u no work automagically
+            vs.editor.render()
 
-            # TODO i wonder if rightbar should be affixed? as long as
-            # it is being done manually?  maybe better to just keep it
-            # totally manual
-            editorPanel.$el.affix()
-
-            $('#center').append(@views.editor.$el).show()
+            $('#center').append(vs.editor.$el).show()
             $('#rightbar').append(editorPanel.$el).show()
         peruse: ->
             if not authed()
@@ -203,6 +210,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     EditorPanelView = Backbone.View.extend
         initialize: ({@template}) ->
+            @$el.affix()
         events:
             'click .hide': 'hide'
             'click .show': 'show'
@@ -218,6 +226,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         events: {}
         render: ->
             html = @template.render()
+            console.log html, 'HI'
             @$el.html html
 
     MetaControlsView = Backbone.View.extend
@@ -249,7 +258,8 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     EditorView = Backbone.View.extend
         initialize: ({@template}) ->
-            @model.on('change:locked', @render.bind(@))
+            @model.on 'change:locked', @render.bind(@)
+            @model.on 'sync', @render.bind(@)
         events:
             'input p.editor': 'editMade'
             'click p.editor': 'selectPlaceholder'
@@ -368,36 +378,3 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             router = new Router
             Backbone.history.start(pushState:false)
     }
-
-
-## Perusal-related views
-#
-#RecentUploadsView = Backbone.View.extend
-#    initialize: () ->
-#
-#HighActivityView = Backbone.View.extend
-#    initialize: () ->
-#
-#FollowersUploadsView = Backbone.View.extend
-#    # ul of followers uploads if any
-#    initialize: () ->
-#
-## Submission views
-#
-#SettingsView = Backbone.View.extend
-#    # public, genre, etc
-#    initialize: () ->
-#
-## Account views
-#
-#ProfileView = Backbone.View.extend
-#    # form for setting un/etc
-#    initialize: () ->
-#
-#StatsView = Backbone.View.extend
-#    # comments given/accepted/etc
-#    initialize: () ->
-#
-#ControlsView = Backbone.View.extend
-#    # logout / etc
-#    initialize: () ->

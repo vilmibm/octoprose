@@ -142,14 +142,7 @@
                 <button class="btn">save</button>
             </fieldset>
         </form> -->
-        <p class="editor" {{^text.locked}}contenteditable{{/text.locked}}>
-            {{#text.content}}
-                {{{text.content}}}
-            {{/text.content}}
-            {{^text.content}}
-            click here to start writing.
-            {{/text.content}}
-        </p>
+        <p class="editor" {{^text.locked}}contenteditable{{/text.locked}}>{{#text.content}} {{{text.content}}} {{/text.content}} {{^text.content}} click here to start writing. {{/text.content}} </p>
     </script> <!-- /#editor -->
 
     <script type="text/mustache" id="textComments">
