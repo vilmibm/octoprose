@@ -67,7 +67,9 @@ app.get '/owns/:uuid', ensureAuth, (q, s) ->
             isOwner: Boolean(doc)
         }
 
-app.get '/currentUserTexts', ensureAuth, (q, s) ->
+app.get '/user/:id/texts', (q, s) ->
+    return s.send [] unless q.isAuthenticated()
+
     Text.find(_user:q.user).populate('revisions').exec (err, docs) ->
         return (new DBError err).finish(s) if err
         s.send docs
@@ -89,7 +91,7 @@ app.post '/text', ensureAuth, (q,s) ->
     # TODO category
     text.desc = textData.desc
     text.title = textData.title
-    text.draft = textData.currentWorkingText
+    text.draft = textData.draft
     text.uuid = node_uuid.v4()
 
     revision = new Revision
@@ -114,7 +116,7 @@ app.put '/text', ensureAuth, (q,s) ->
             return (new PermError(user._id, textData.uuid)).finish s
 
         text.uuid = textData.uuid
-        text.draft = textData.currentWorkingText
+        text.draft = textData.draft
         text.title = textData.title
         text.desc = textData.desc
         # TODO category
