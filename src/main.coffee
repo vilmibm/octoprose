@@ -76,7 +76,7 @@ app.get '/user/:id/texts', (q, s) ->
 
 app.get '/text/:uuid', (q, s, n) ->
     uuid = q.params.uuid
-    text = Text.findOne(uuid:uuid).populate('revisions').exec (err, doc) ->
+    text = Text.findOne(uuid:uuid).populate('revisions').populate('_user').exec (err, doc) ->
         return (new DBError err).finish(s) if err
         return (new NotFoundError uuid).finish(s) unless doc
         s.send doc

@@ -154,6 +154,14 @@
         </div>
     </script> <!-- /#editorPanel -->
 
+    <script type="text/mustache" id="readOnlyMetadata">
+        <h4>{{^text.title}}Untitled{{/text.title}}{{text.title}}</h4>
+        <em>by {{text._user.username}}</em>
+        <p class="muted">
+            {{text.desc}}
+        </p>
+    </script><!-- /#readOnlyMetadata -->
+
     <script type="text/mustache" id="suggestionNav">
         <p>
           <button class="btn btn-mini" disabled="true"><i class="icon-arrow-down"></i></button>

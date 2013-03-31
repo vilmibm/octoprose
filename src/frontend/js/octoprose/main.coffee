@@ -108,7 +108,6 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
             vs.panel.append vs.sugNav
 
-
             (vs.editor = new EditorView template:tmpl('editor'), model: text).render()
 
             text.fetch()
@@ -120,10 +119,14 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             $('#leftbar, #rightbar, #center').empty()
             $('#leftbar').hide()
             @views.peruseText = {} unless @views.peruseText
-            text = @collections.userTexts.find (t) -> t.get('uuid') is uuid
+            text = new Text uuid:uuid
             vs = @views.peruseText
 
             (vs.panel = new EditorPanelView template:tmpl('editorPanel'), model: text).render()
+
+            (vs.readOnlyMeta = new ReadOnlyMetadataView template:tmpl('readOnlyMetadata'), model:text).render()
+
+            vs.panel.append vs.readOnlyMeta
 
             (vs.sugNav = new SuggestionNavView template:tmpl('suggestionNav'), model: text).render()
 
@@ -251,9 +254,20 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     SuggestionNavView = Backbone.View.extend
         initialize: ({@template}) ->
+            @model.on('sync', @render.bind(@))
         events: {}
         render: ->
             html = @template.render()
+            @$el.html html
+
+    ReadOnlyMetadataView = Backbone.View.extend
+        initialize: ({@template}) ->
+            @model.on('sync', @render.bind(@))
+        render: ->
+            textObject = @model.toJSON()
+            context =
+                text: @model.toJSON()
+            html = @template.render context
             @$el.html html
 
     MetaControlsView = Backbone.View.extend
@@ -347,7 +361,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         idAttribute: 'uuid'
         relations: [{
             type:'HasOne'
-            key:'user'
+            key:'_user'
             relatedModel: 'User'
             reverseRelation: {
                 key: 'texts'
