@@ -194,10 +194,25 @@
                     <button type="button" class="btn btn-mini "><i class="icon-eye-open"></i> Public</button>
                 </div>
             </p>
+            {{^text.locked}}
             <p>
-                <input type="text" name="title" {{^text.title}}placeholder="Click to add a title"{{/text.title}} {{#text.title}}value="{{text.title}}"{{/text.title}}/><br />
-                <textarea cols="100" name="description" rows="2" class="muted">Click to add a description</textarea>
+                 <input type="text" name="title"
+                 {{^text.title}}placeholder="Click to add a title"{{/text.title}} {{#text.title}}value="{{text.title}}"{{/text.title}}/><br />
+                <textarea
+                     cols="100"
+                     name="description"
+                     rows="2"
+                     class="{{^text.desc}}muted{{/text.desc}}"
+                     >{{^text.desc}}Click to add a description{{/text.desc}} {{#text.desc}}{{text.desc}}{{/text.desc}}</textarea>
             </p>
+            {{/text.locked}}
+
+            {{#text.locked}}
+            <p>
+                <h4>{{text.title}}</h4>
+                <div class="muted">{{text.desc}}</div>
+            </p>
+            {{/text.locked}}
         </div> <!-- /.metaControls -->
     </script>
 
