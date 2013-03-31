@@ -95,18 +95,18 @@
         <table class="table table-bordered table-striped table-condensed">
             <thead>
                 <tr>
-                    <th>Description</th> <th>Revisions</th> <th>Created</th>
+                    <th>Title</th> <th>Description</th> <th>Revisions</th> <th>Created</th>
                 </tr>
             </thead>
             <tbody>
                 {{# texts }}
                 <tr>
-                    <td>{{desc}}</td> <td>{{numRevisions}}</td> <td>{{created}}</td>
+                    <td><a href="#/edit/{{uuid}}">{{title}}</a></td><td>{{desc}}</td> <td>{{numRevisions}}</td> <td>{{created}}</td>
                 </tr>
                 {{/ texts }}
                 {{^ texts }}
                 <tr class="error">
-                    <td colspan="3"> None found. Why not <a href="/#/submit">write one?</a> </td>
+                    <td colspan="4"> None found. Why not <a href="/#/submit">write one?</a> </td>
                 </tr>
                 {{/ texts }}
             </tbody>
@@ -142,14 +142,7 @@
                 <button class="btn">save</button>
             </fieldset>
         </form> -->
-        <p class="editor" {{^text.locked}}contenteditable{{/text.locked}}>
-            {{#text.content}}
-                {{{text.content}}}
-            {{/text.content}}
-            {{^text.content}}
-            click here to start writing.
-            {{/text.content}}
-        </p>
+        <p class="editor" {{^text.locked}}contenteditable{{/text.locked}}>{{#text.content}} {{{text.content}}} {{/text.content}} {{^text.content}} click here to start writing. {{/text.content}} </p>
     </script> <!-- /#editor -->
 
     <script type="text/mustache" id="textComments">
@@ -159,7 +152,15 @@
     <script type="text/mustache" id="editorPanel">
         <div data-spy="affix" class="editorPanel well well-small affix-top">
         </div>
-    </script> <!-- /#metaControls -->
+    </script> <!-- /#editorPanel -->
+
+    <script type="text/mustache" id="readOnlyMetadata">
+        <h4>{{^text.title}}Untitled{{/text.title}}{{text.title}}</h4>
+        <em>by {{text._user.username}}</em>
+        <p class="muted">
+            {{text.desc}}
+        </p>
+    </script><!-- /#readOnlyMetadata -->
 
     <script type="text/mustache" id="suggestionNav">
         <p>
@@ -201,10 +202,25 @@
                     <button type="button" class="btn btn-mini "><i class="icon-eye-open"></i> Public</button>
                 </div>
             </p>
+            {{^text.locked}}
             <p>
-                <input type="text" name="title" {{^text.title}}placeholder="Click to add a title"{{/text.title}} {{#text.title}}value="{{text.title}}"{{/text.title}}/><br />
-                <textarea cols="100" name="description" rows="2" class="muted">Click to add a description</textarea>
+                 <input type="text" name="title"
+                 {{^text.title}}placeholder="Click to add a title"{{/text.title}} {{#text.title}}value="{{text.title}}"{{/text.title}}/><br />
+                <textarea
+                     cols="100"
+                     name="description"
+                     rows="2"
+                     class="{{^text.desc}}muted{{/text.desc}}"
+                     >{{^text.desc}}Click to add a description{{/text.desc}} {{#text.desc}}{{text.desc}}{{/text.desc}}</textarea>
             </p>
+            {{/text.locked}}
+
+            {{#text.locked}}
+            <p>
+                <h4>{{text.title}}</h4>
+                <div class="muted">{{text.desc}}</div>
+            </p>
+            {{/text.locked}}
         </div> <!-- /.metaControls -->
     </script>
 

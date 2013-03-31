@@ -12,24 +12,38 @@ reqs = [
 ]
 define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
     authed = cookie.get.bind cookie, 'octoauth'
-    getCurrentUser = -> new User(store.get 'user')
-    setCurrentUser = (data) ->
-         store.set('user', data)
-         return new User(data)
-    unsetCurrentUser = -> store.remove 'user'
+    owner = (uuid, cb) ->
+        $.getJSON("owns/#{uuid}")
+            .success((data) ->
+                cb null, data.isOwner
+            )
+            .error cb.bind({}, 'panic')
+
     newlineToBr = (s) -> if s then s.replace(/\n/g, '<br/>') else s
 
     tmpl = (name) -> hogan.compile $("##{name}").text()
 
     Router = Backbone.Router.extend
+        setCurrentUser: (userData) ->
+            @user = new User userData
+            @collections.userTexts = new UserTexts @user
+            @collections.userTexts.fetch(async:false)
+            return @user
         initialize: ->
             @route /^\/?$/, 'default', @default
             @views = {}
+            @collections = {}
+            if cookie.get 'octoauth'
+                @setCurrentUser store.get 'userData'
         routes:
             submit: 'submit'
+            'edit/:uuid': 'editText'
+
+            'text/:uuid': 'text'
+            'preview/:uuid': 'preview'
 
             peruse: 'peruse'
-            'peruse/text/:uuid': 'peruse_text'
+            'peruse/:uuid': 'peruseText'
 
             account: 'account'
             'account/documents': 'account_documents',
@@ -39,13 +53,14 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         default: ->
             if authed()
                 return @navigate('account', trigger: true)
-            @views.auth = new AuthView(template:tmpl('auth'))
-            @views.recent = new RecentView(template:tmpl('recent'))
+            vs = (@views.auth = @views.auth || {})
+            vs.auth = new AuthView(template:tmpl('auth'))
+            vs.recent = new RecentView(template:tmpl('recent'))
 
             $('#rightbar')
                 .empty()
                 .show()
-                .append(@views.recent.$el)
+                .append(vs.recent.$el)
 
             $('#center')
                 .empty()
@@ -55,19 +70,75 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             $('#leftbar')
                 .empty()
                 .show()
-                .append(@views.auth.$el)
-            @views.recent.render()
+                .append(vs.auth.$el)
+            vs.recent.render()
 
-            @views.auth.render()
+            vs.auth.render()
             # this should be automatic. fucker.
-            @views.auth.delegateEvents(@views.auth.events)
-            @views.auth.on 'login', (userData) =>
-                setCurrentUser userData
+            vs.auth.delegateEvents(vs.auth.events)
+            userEntry = (userData) =>
+                @setCurrentUser userData
                 cookie.set 'octoauth', 'true'
-                @navigate 'submit', trigger:true
-            @views.auth.on 'signup', =>
-                cookie.set 'octoauth', 'true'
-                @navigate 'account', trigger:true
+                store.set 'userData', userData
+                @navigate 'account/documents', trigger:true
+            vs.auth.on 'login', userEntry
+            vs.auth.on 'signup', userEntry
+        text: (uuid) ->
+            nav = (r) => @navigate "#{r}/#{uuid}", trigger:true
+            unless authed()
+                return nav 'preview'
+
+            owner uuid, (err, isOwner) ->
+                nav( if isOwner then 'edit' else 'peruse' )
+        preview: (uuid) ->
+            console.log 'PREVIEWING'
+        editText: (uuid) ->
+            $('#leftbar, #rightbar, #center').empty()
+            $('#leftbar').hide()
+            vs = (@views.editText = @views.editText or {})
+            text = @collections.userTexts.find (t) -> t.get('uuid') is uuid
+
+            (vs.panel = new EditorPanelView template:tmpl('editorPanel'), model: text).render()
+
+            (vs.meta = new MetaControlsView template: tmpl('metaControls'), model: text).render()
+
+            vs.panel.append vs.meta
+
+            (vs.sugNav = new SuggestionNavView template:tmpl('suggestionNav'), model: text).render()
+
+            vs.panel.append vs.sugNav
+
+            (vs.editor = new EditorView template:tmpl('editor'), model: text).render()
+
+            text.fetch()
+
+            $('#center').append(vs.editor.$el).show()
+            $('#rightbar').append(vs.panel.$el).show()
+
+        peruseText: (uuid) ->
+            $('#leftbar, #rightbar, #center').empty()
+            $('#leftbar').hide()
+            @views.peruseText = {} unless @views.peruseText
+            text = new Text uuid:uuid
+            vs = @views.peruseText
+
+            (vs.panel = new EditorPanelView template:tmpl('editorPanel'), model: text).render()
+
+            (vs.readOnlyMeta = new ReadOnlyMetadataView template:tmpl('readOnlyMetadata'), model:text).render()
+
+            vs.panel.append vs.readOnlyMeta
+
+            (vs.sugNav = new SuggestionNavView template:tmpl('suggestionNav'), model: text).render()
+
+            vs.panel.append vs.sugNav
+
+            (vs.editor = new EditorView template:tmpl('editor'), model: text).render()
+
+            text.set 'lock', true
+            text.fetch()
+
+            $('#center').append(vs.editor.$el).show()
+            $('#rightbar').append(vs.panel.$el).show()
         submit: ->
             # This route is a shortcut for creating a new document and working
             # on it.
@@ -79,34 +150,22 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             # Always make a new document when clicking submit.
             text = new Text
 
-            unless @views.editorPanel
-                @views.editorPanel = new EditorPanelView(template:tmpl('editorPanel'))
-                @views.editorPanel.render()
+            vs = (@views.submit = @views.submit or {})
 
-            editorPanel = @views.editorPanel
+            vs.panel = new EditorPanelView template:tmpl('editorPanel')
+            vs.panel.render()
 
-            unless @views.metaControls
-                @views.metaControls = new MetaControlsView(template:tmpl('metaControls'),model:text)
-                @views.metaControls.render()
-                editorPanel.append @views.metaControls
-            else
-                editorPanel.model = text
+            vs.meta = new MetaControlsView template: tmpl('metaControls'), model: text
+            vs.meta.render()
+            vs.panel.append vs.meta
 
-            unless @views.editor
-                @views.editor = new EditorView(template:tmpl('editor'), model:text)
-                @views.editor.delegateEvents @views.editor.events
-                @views.editor.on 'new', (uuid) => @navigate "peruse/text/#{uuid}", trigger:true
-                @views.editor.render()
-            else
-                @views.editor.model = text
+            vs.editor = new EditorView template: tmpl('editor'), model: text
+            
+            vs.editor.delegateEvents vs.editor.events # TODO why u no work automagically
+            vs.editor.render()
 
-            # TODO i wonder if rightbar should be affixed? as long as
-            # it is being done manually?  maybe better to just keep it
-            # totally manual
-            editorPanel.$el.affix()
-
-            $('#center').append(@views.editor.$el).show()
-            $('#rightbar').append(editorPanel.$el).show()
+            $('#center').append(vs.editor.$el).show()
+            $('#rightbar').append(vs.panel.$el).show()
         peruse: ->
             if not authed()
                 return @navigate '/', trigger:true
@@ -128,18 +187,19 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         account_documents: ->
             $('#center, #rightbar, #leftbar').empty().hide()
             $('#leftbar').html($('#accountBar').text()).show()
-            unless @views.userTexts
-                userTexts = new (Texts.extend url: '/currentUserTexts')
-                @views.userTexts = new TextsView collection:userTexts, template: tmpl('texts')
-            @views.userTexts.render().hide()
-            @views.userTexts.collection.fetch(success:=>@views.userTexts.$el.show())
-            $('#center').append(@views.userTexts.$el).show()
+            userTexts = @collections.userTexts
+                
+            vs = (@views.account_documents = @views.account_documents or {})
+            vs.userTexts = new TextsView collection:userTexts, template: tmpl('texts')
+            vs.userTexts.render()
+            $('#center').append(vs.userTexts.$el).show()
 
         account_suggestions: ->
         account_profile: ->
         account_logout: ->
             cookie.remove 'octoauth'
-            unsetCurrentUser()
+            delete @user
+            delete @collections.userTexts
             $.get('/logout').success(=>
                 @navigate '/', trigger:true
             ).error(=> console.error 'could not logout')
@@ -170,6 +230,8 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             truncate = (n, s) -> if s.length > n then "#{s[..n]}..." else s
             context =
                 texts: @collection.map (text) -> {
+                    uuid: text.get('uuid')
+                    title: text.get('title')
                     desc: truncate(100, text.get('desc'))
                     numRevisions: text.get('revisions').length
                     created: moment(text.get('created')).fromNow()
@@ -179,6 +241,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     EditorPanelView = Backbone.View.extend
         initialize: ({@template}) ->
+            @$el.affix()
         events:
             'click .hide': 'hide'
             'click .show': 'show'
@@ -191,9 +254,20 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     SuggestionNavView = Backbone.View.extend
         initialize: ({@template}) ->
+            @model.on('sync', @render.bind(@))
         events: {}
         render: ->
             html = @template.render()
+            @$el.html html
+
+    ReadOnlyMetadataView = Backbone.View.extend
+        initialize: ({@template}) ->
+            @model.on('sync', @render.bind(@))
+        render: ->
+            textObject = @model.toJSON()
+            context =
+                text: @model.toJSON()
+            html = @template.render context
             @$el.html html
 
     MetaControlsView = Backbone.View.extend
@@ -225,18 +299,19 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
     EditorView = Backbone.View.extend
         initialize: ({@template}) ->
-            @model.on('change:locked', @render.bind(@))
+            @model.on 'change:locked', @render.bind(@)
+            @model.on 'sync', @render.bind(@)
         events:
             'input p.editor': 'editMade'
             'click p.editor': 'selectPlaceholder'
         editMade: (e) ->
             newText = newlineToBr @$(e.target).text()
-            @model.set('currentWorkingText', newText)
+            @model.set('draft', newText)
         selectPlaceholder: ->
-            document.execCommand('selectAll') unless @model.get 'currentWorkingText'
+            document.execCommand('selectAll') unless @model.get 'draft'
         render: ->
             textObject = @model.toJSON()
-            textObject.content = @model.get 'currentWorkingText'
+            textObject.content = @model.get 'draft'
             context =
                 text: textObject
             html = @template.render context
@@ -266,9 +341,8 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             e.preventDefault()
             data = f2o e.target
             $.post('/signup', data)
-            .success((data) =>
-                setCurrentUser data
-                @trigger 'signup'
+            .success((userData) =>
+                @trigger 'signup', userData
             )
             .error(=>
                 console.log('nope')
@@ -287,7 +361,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         idAttribute: 'uuid'
         relations: [{
             type:'HasOne'
-            key:'user'
+            key:'_user'
             relatedModel: 'User'
             reverseRelation: {
                 key: 'texts'
@@ -302,7 +376,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             }
         }],
         saveNewRevision: ->
-            newText = @get 'currentWorkingText'
+            newText = @get 'draft'
             revisions = @get 'revisions'
             if revisions.length is 0
                 idx = 1
@@ -339,41 +413,12 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
         model: Text
         url: '/texts'
 
+    UserTexts = Texts.extend
+        initialize: (@user) ->
+        url: -> "/user/#{@user.get('_id')}/texts"
+
     return {
         init: ->
             router = new Router
             Backbone.history.start(pushState:false)
     }
-
-
-## Perusal-related views
-#
-#RecentUploadsView = Backbone.View.extend
-#    initialize: () ->
-#
-#HighActivityView = Backbone.View.extend
-#    initialize: () ->
-#
-#FollowersUploadsView = Backbone.View.extend
-#    # ul of followers uploads if any
-#    initialize: () ->
-#
-## Submission views
-#
-#SettingsView = Backbone.View.extend
-#    # public, genre, etc
-#    initialize: () ->
-#
-## Account views
-#
-#ProfileView = Backbone.View.extend
-#    # form for setting un/etc
-#    initialize: () ->
-#
-#StatsView = Backbone.View.extend
-#    # comments given/accepted/etc
-#    initialize: () ->
-#
-#ControlsView = Backbone.View.extend
-#    # logout / etc
-#    initialize: () ->

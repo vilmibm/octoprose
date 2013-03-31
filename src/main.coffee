@@ -3,7 +3,7 @@ async = require 'async'
 express = require 'express'
 hash = require 'node_hash'
 p = require 'passport'
-uuid = require 'node-uuid'
+node_uuid = require 'node-uuid'
 _ = require 'underscore'
 
 domain = process.env.OCTO_DOMAIN or 'localhost'
@@ -60,14 +60,23 @@ app.get '/', (q, s) -> s.rend 'index.html'
 
 # data api
 
-app.get '/currentUserTexts', ensureAuth, (q, s) ->
+app.get '/owns/:uuid', ensureAuth, (q, s) ->
+    Text.findOne(_user:q.user, uuid:q.params.uuid).exec (err, doc) ->
+        return (new DBError err).finish(s) if err
+        return s.send {
+            isOwner: Boolean(doc)
+        }
+
+app.get '/user/:id/texts', (q, s) ->
+    return s.send [] unless q.isAuthenticated()
+
     Text.find(_user:q.user).populate('revisions').exec (err, docs) ->
         return (new DBError err).finish(s) if err
         s.send docs
 
 app.get '/text/:uuid', (q, s, n) ->
     uuid = q.params.uuid
-    text = Text.findOne(uuid:uuid).populate('revisions').exec (err, doc) ->
+    text = Text.findOne(uuid:uuid).populate('revisions').populate('_user').exec (err, doc) ->
         return (new DBError err).finish(s) if err
         return (new NotFoundError uuid).finish(s) unless doc
         s.send doc
@@ -82,8 +91,8 @@ app.post '/text', ensureAuth, (q,s) ->
     # TODO category
     text.desc = textData.desc
     text.title = textData.title
-    text.draft = textData.currentWorkingText
-    text.uuid = uuid.v4()
+    text.draft = textData.draft
+    text.uuid = node_uuid.v4()
 
     revision = new Revision
     revision.content = textData.revisions[0].content
@@ -100,14 +109,14 @@ app.put '/text', ensureAuth, (q,s) ->
     user = q.user
     textData = q.body
 
-    Text.findOne(textData.uuid).populate('_user').populate('revisions').exec (e, text) ->
+    Text.findOne(uuid:textData.uuid).populate('_user').populate('revisions').exec (e, text) ->
         return (new DBError e).finish(s) if e
         return (new NotFoundError(textData.uuid)).finish(s) unless text
         if String(text._user._id) isnt String(user._id)
-            return (new PermError(user._id, textData.uuid)).finish s
+            return (new PermError(user._id, text.uuid)).finish s
 
         text.uuid = textData.uuid
-        text.draft = textData.currentWorkingText
+        text.draft = textData.draft
         text.title = textData.title
         text.desc = textData.desc
         # TODO category
