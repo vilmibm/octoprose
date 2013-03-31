@@ -109,11 +109,11 @@ app.put '/text', ensureAuth, (q,s) ->
     user = q.user
     textData = q.body
 
-    Text.findOne(textData.uuid).populate('_user').populate('revisions').exec (e, text) ->
+    Text.findOne(uuid:textData.uuid).populate('_user').populate('revisions').exec (e, text) ->
         return (new DBError e).finish(s) if e
         return (new NotFoundError(textData.uuid)).finish(s) unless text
         if String(text._user._id) isnt String(user._id)
-            return (new PermError(user._id, textData.uuid)).finish s
+            return (new PermError(user._id, text.uuid)).finish s
 
         text.uuid = textData.uuid
         text.draft = textData.draft
