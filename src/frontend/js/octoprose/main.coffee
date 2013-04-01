@@ -134,7 +134,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
 
             (vs.editor = new EditorView template:tmpl('editor'), model: text).render()
 
-            text.set 'lock', true
+            text.set 'locked', true
             text.fetch()
 
             $('#center').append(vs.editor.$el).show()
