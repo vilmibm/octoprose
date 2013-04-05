@@ -7,6 +7,10 @@ setCreated = (n) ->
     @created = @_id.getTimestamp() unless @created
     n()
 
+setUpdated = (n) ->
+    @updated = Date.now()
+    n()
+
 SignupRequestSchema = new Schema(
     username: {type:String, index:true}
     email: {type:String}
@@ -59,11 +63,13 @@ TextSchema = new Schema(
     draft: {type:String, default:''}
     #category_slug: {type:String, default:'no-category'}
     created: {type:Date}
+    updated: {type:Date}
     title: {type:String, required:true}
     desc: {type:String}
     revisions: [ref 'Revision']
 )
 TextSchema.pre 'save', setCreated
+TextSchema.pre 'save', setUpdated
 
 exports.User = mg.model('User', UserSchema)
 exports.Suggestion = mg.model('Suggestion', SuggestionSchema)

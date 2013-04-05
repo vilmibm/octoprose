@@ -53,28 +53,23 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
             'account/logout': 'account_logout',
         default: ->
             if authed()
-                return @navigate('account', trigger: true)
-            vs = (@views.auth = @views.auth || {})
+                return @navigate('account/documents', trigger: true)
+
+            $('#leftbar, #center, #rightbar').empty().show()
+
+            vs = (@views.default = @views.default or {})
+            cs = (@collections.default = @collections.default or {})
+
+            cs.recent = new RecentTexts
+            cs.recent.fetch()
+            vs.recent = new TextListView listTitle:"Recent Texts", template:tmpl('textList'), collection: cs.recent
+
             vs.auth = new AuthView(template:tmpl('auth'))
-            vs.recent = new RecentView(template:tmpl('recent'))
 
-            $('#rightbar')
-                .empty()
-                .show()
-                .append(vs.recent.$el)
+            $('#rightbar').append(vs.recent.$el)
+            $('#center').append($('#frontblurb').clone().show())
+            $('#leftbar').append(vs.auth.render())
 
-            $('#center')
-                .empty()
-                .show()
-                .append($('#frontblurb').clone().show())
-
-            $('#leftbar')
-                .empty()
-                .show()
-                .append(vs.auth.$el)
-            vs.recent.render()
-
-            vs.auth.render()
             # this should be automatic. fucker.
             vs.auth.delegateEvents(vs.auth.events)
             userEntry = (userData) =>
@@ -96,7 +91,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
             $('#leftbar, #rightbar, #center').empty()
             $('#leftbar').hide()
             @views.preview = {} unless @views.preview
-            text = new Text uuid:uuid
+            text = Text.findOrCreate(uuid:uuid)
             vs = @views.preview
 
             (vs.panel = new EditorPanelView template:tmpl('editorPanel'), model: text).render()
@@ -144,7 +139,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
             $('#leftbar, #rightbar, #center').empty()
             $('#leftbar').hide()
             @views.peruseText = {} unless @views.peruseText
-            text = new Text uuid:uuid
+            text = Text.findOrCreate(uuid:uuid)
             vs = @views.peruseText
 
             (vs.panel = new EditorPanelView template:tmpl('editorPanel'), model: text).render()
@@ -185,15 +180,24 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
             vs.panel.append vs.meta
 
             vs.editor = new EditorView template: tmpl('editor'), model: text
-            
             vs.editor.delegateEvents vs.editor.events # TODO why u no work automagically
             vs.editor.render()
 
             $('#center').append(vs.editor.$el).show()
             $('#rightbar').append(vs.panel.$el).show()
         peruse: ->
-            if not authed()
-                return @navigate '/', trigger:true
+            $('#leftbar, #center, #rightbar').empty()
+            $('#leftbar, #rightbar').hide()
+
+            vs = (@views.peruse = @views.peruse or {})
+            cs = (@collections.peruse = @collections.peruse or {})
+            textListTemplate = tmpl('textList')
+            cs.recent = new RecentTexts
+            vs.recent = new TextListView listTitle:"Recent Texts", template:textListTemplate, collection: cs.recent
+
+            cs.recent.fetch()
+
+            $('#center').append(vs.recent.$el).show()
         peruse_text: (uuid) ->
             text = new Text
             text.set('uuid', uuid)
@@ -213,9 +217,8 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
             $('#center, #rightbar, #leftbar').empty().hide()
             $('#leftbar').html($('#accountBar').text()).show()
             userTexts = @collections.userTexts
-                
             vs = (@views.account_documents = @views.account_documents or {})
-            vs.userTexts = new TextsView collection:userTexts, template: tmpl('texts')
+            vs.userTexts = new DetailedTextsView collection:userTexts, template: tmpl('texts')
             vs.userTexts.render()
             $('#center').append(vs.userTexts.$el).show()
 
@@ -245,7 +248,17 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
 
             @$el.html(@template.render(context))
 
-    TextsView = Backbone.View.extend
+    TextListView = Backbone.View.extend
+        initialize: ({@template, @listTitle}) ->
+            @collection.on('reset', @render.bind @)
+        render: ->
+            context =
+                listTitle: @listTitle
+                texts: @collection.map (t) -> t.toJSON()
+            html = @template.render context
+            @$el.html html
+
+    DetailedTextsView = Backbone.View.extend
         initialize: ({@template}) ->
             @collection.on('reset', @render.bind @)
         events:
@@ -443,6 +456,9 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
     UserTexts = Texts.extend
         initialize: (@user) ->
         url: -> "/user/#{@user.get('_id')}/texts"
+
+    RecentTexts = Texts.extend
+        url: -> "/texts/recent"
 
     return {
         init: ->

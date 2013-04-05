@@ -35,41 +35,6 @@
 
     <!-- Templates -->
 
-    <script type="text/mustache" id="recent">
-        <h6>recent uploads</h6>
-        <ul>
-            <li>
-                <a href="#">short scifi piece</a>
-                <p>
-                    <small><em>
-                        Ankram fled the burning ship...
-                    </em></small>
-                </p>
-            </li>
-            <li>
-                <a href="#">history essay</a>
-                <p>
-                    <small><em>
-                        Four score and seven elevens ago...
-                    </em></small>
-                </p>
-            </li>
-            <li>
-                <a href="#">speech</a>
-                <p>
-                    <small><em>
-                        Hello and good morning...
-                    </em></small>
-                </p>
-            </li>
-        </ul>
-        <p>
-            <small>
-                <a href="#/peruse">more...</a>
-            </small>
-        </p>
-    </script>
-
     <div id="frontblurb" style="display:none">
         <h1>octoprose</h1>
         <p class="lead">is a free, useful tool for proofreading prose.</p>
@@ -134,13 +99,26 @@
         </form>
     </script> <!-- #auth -->
 
+    <script type="text/mustache" id="textList">
+        <h5>{{listTitle}}</h5>
+        <ul>
+            {{#texts}}
+            <li>
+                <a href="#/text/{{uuid}}">{{title}}</a> <span class="muted">by {{_user.username}}</span>
+                <p class="muted">
+                    <small><em>{{desc}}</em></small>
+                </p>
+            </li>
+            {{/texts}}
+        </ul>
+    </script>
+
     <script type="text/mustache" id="editor">
         {{#text.locked}}
         <p class="editor">{{{text.content}}}</p>
         {{/text.locked}}
 
         {{^text.locked}}
-        <!--<p class="editor" contenteditable>{{text.content}}</p>-->
         <textarea class="editor">{{text.content}}</textarea>
         {{/text.locked}}
     </script> <!-- /#editor -->

@@ -74,12 +74,17 @@ app.get '/user/:id/texts', (q, s) ->
         return (new DBError err).finish(s) if err
         s.send docs
 
-app.get '/text/:uuid', (q, s, n) ->
+app.get '/text/:uuid', (q, s) ->
     uuid = q.params.uuid
     text = Text.findOne(uuid:uuid).populate('revisions').populate('_user').exec (err, doc) ->
         return (new DBError err).finish(s) if err
         return (new NotFoundError uuid).finish(s) unless doc
         s.send doc
+
+app.get '/texts/recent', (q, s) ->
+    Text.find().sort('-updated').limit(10).populate('_user', 'username').exec (err, docs) ->
+        return (new DBError err).finish(s) if err
+        s.send docs
 
 app.post '/text', ensureAuth, (q,s) ->
     author = q.user
