@@ -1,18 +1,18 @@
 /** vim: et:ts=4:sw=4:sts=4
- * @license RequireJS 2.1.2 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license RequireJS 2.1.4 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
 //Not using strict: uneven strict support in browsers, #392, and causes
 //problems with requirejs.exec()/transpiler plugins that may not be strict.
 /*jslint regexp: true, nomen: true, sloppy: true */
-/*global window, navigator, document, importScripts, jQuery, setTimeout, opera */
+/*global window, navigator, document, importScripts, setTimeout, opera */
 
 var requirejs, require, define;
 (function (global) {
     var req, s, head, baseElement, dataMain, src,
         interactiveScript, currentlyAddingScript, mainScript, subPath,
-        version = '2.1.2',
+        version = '2.1.4',
         commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
         cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
         jsSuffixRegExp = /\.js$/,
@@ -21,7 +21,6 @@ var requirejs, require, define;
         ostring = op.toString,
         hasOwn = op.hasOwnProperty,
         ap = Array.prototype,
-        aps = ap.slice,
         apsp = ap.splice,
         isBrowser = !!(typeof window !== 'undefined' && navigator && document),
         isWebWorker = !isBrowser && typeof importScripts !== 'undefined',
@@ -918,8 +917,7 @@ var requirejs, require, define;
                         name = this.map.name,
                         parentName = this.map.parentMap ? this.map.parentMap.name : null,
                         localRequire = context.makeRequire(map.parentMap, {
-                            enableBuildCallback: true,
-                            skipMap: true
+                            enableBuildCallback: true
                         });
 
                     //If current map is not normalized, wait for that
@@ -1017,8 +1015,11 @@ var requirejs, require, define;
                         try {
                             req.exec(text);
                         } catch (e) {
-                            throw new Error('fromText eval for ' + moduleName +
-                                            ' failed: ' + e);
+                            return onError(makeError('fromtexteval',
+                                             'fromText eval for ' + id +
+                                            ' failed: ' + e,
+                                             e,
+                                             [id]));
                         }
 
                         if (hasInteractive) {
@@ -1395,16 +1396,21 @@ var requirejs, require, define;
                      * plain URLs like nameToUrl.
                      */
                     toUrl: function (moduleNamePlusExt) {
-                        var index = moduleNamePlusExt.lastIndexOf('.'),
-                            ext = null;
+                        var ext, url,
+                            index = moduleNamePlusExt.lastIndexOf('.'),
+                            segment = moduleNamePlusExt.split('/')[0],
+                            isRelative = segment === '.' || segment === '..';
 
-                        if (index !== -1) {
+                        //Have a file extension alias, and it is not the
+                        //dots from a relative path.
+                        if (index !== -1 && (!isRelative || index > 1)) {
                             ext = moduleNamePlusExt.substring(index, moduleNamePlusExt.length);
                             moduleNamePlusExt = moduleNamePlusExt.substring(0, index);
                         }
 
-                        return context.nameToUrl(normalize(moduleNamePlusExt,
-                                                relMap && relMap.id, true), ext);
+                        url = context.nameToUrl(normalize(moduleNamePlusExt,
+                                                relMap && relMap.id, true), ext || '.fake');
+                        return ext ? url : url.substring(0, url.length - 5);
                     },
 
                     defined: function (id) {
@@ -1449,10 +1455,11 @@ var requirejs, require, define;
 
             /**
              * Called to enable a module if it is still in the registry
-             * awaiting enablement. parent module is passed in for context,
-             * used by the optimizer.
+             * awaiting enablement. A second arg, parent, the parent module,
+             * is passed in for context, when this method is overriden by
+             * the optimizer. Not shown here to keep code compact.
              */
-            enable: function (depMap, parent) {
+            enable: function (depMap) {
                 var mod = getOwn(registry, depMap.id);
                 if (mod) {
                     getModule(depMap).enable();
@@ -1995,16 +2002,6 @@ var requirejs, require, define;
 var jam = {
     "packages": [
         {
-            "name": "backbone",
-            "location": "jam/backbone",
-            "main": "backbone.js"
-        },
-        {
-            "name": "backbone-rel",
-            "location": "jam/backbone-rel",
-            "main": "backbone-relational.js"
-        },
-        {
             "name": "store",
             "location": "jam/store",
             "main": "store"
@@ -2015,9 +2012,24 @@ var jam = {
             "main": "md5.js"
         },
         {
+            "name": "hogan",
+            "location": "jam/hogan",
+            "main": "hogan.js"
+        },
+        {
+            "name": "backbone",
+            "location": "jam/backbone",
+            "main": "backbone.js"
+        },
+        {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
+        },
+        {
+            "name": "jquery",
+            "location": "jam/jquery",
+            "main": "dist/jquery.js"
         },
         {
             "name": "moment",
@@ -2030,18 +2042,21 @@ var jam = {
             "main": "cookie.js"
         },
         {
-            "name": "hogan",
-            "location": "jam/hogan",
-            "main": "hogan.js"
+            "name": "backbone-rel",
+            "location": "jam/backbone-rel",
+            "main": "backbone-relational.js"
         },
         {
-            "name": "jquery",
-            "location": "jam/jquery",
-            "main": "dist/jquery.js"
+            "name": "marked",
+            "location": "jam/marked",
+            "main": "./lib/marked.js"
         }
     ],
-    "version": "0.2.13",
+    "version": "0.2.15",
     "shim": {
+        "hogan": {
+            "exports": "hogan"
+        },
         "backbone": {
             "deps": [
                 "jquery",
@@ -2049,16 +2064,13 @@ var jam = {
             ],
             "exports": "Backbone"
         },
+        "underscore": {
+            "exports": "_"
+        },
         "backbone-rel": {
             "deps": [
                 "backbone"
             ]
-        },
-        "underscore": {
-            "exports": "_"
-        },
-        "hogan": {
-            "exports": "hogan"
         }
     }
 };
@@ -2067,16 +2079,6 @@ if (typeof require !== "undefined" && require.config) {
     require.config({
     "packages": [
         {
-            "name": "backbone",
-            "location": "jam/backbone",
-            "main": "backbone.js"
-        },
-        {
-            "name": "backbone-rel",
-            "location": "jam/backbone-rel",
-            "main": "backbone-relational.js"
-        },
-        {
             "name": "store",
             "location": "jam/store",
             "main": "store"
@@ -2087,9 +2089,24 @@ if (typeof require !== "undefined" && require.config) {
             "main": "md5.js"
         },
         {
+            "name": "hogan",
+            "location": "jam/hogan",
+            "main": "hogan.js"
+        },
+        {
+            "name": "backbone",
+            "location": "jam/backbone",
+            "main": "backbone.js"
+        },
+        {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
+        },
+        {
+            "name": "jquery",
+            "location": "jam/jquery",
+            "main": "dist/jquery.js"
         },
         {
             "name": "moment",
@@ -2102,17 +2119,20 @@ if (typeof require !== "undefined" && require.config) {
             "main": "cookie.js"
         },
         {
-            "name": "hogan",
-            "location": "jam/hogan",
-            "main": "hogan.js"
+            "name": "backbone-rel",
+            "location": "jam/backbone-rel",
+            "main": "backbone-relational.js"
         },
         {
-            "name": "jquery",
-            "location": "jam/jquery",
-            "main": "dist/jquery.js"
+            "name": "marked",
+            "location": "jam/marked",
+            "main": "./lib/marked.js"
         }
     ],
     "shim": {
+        "hogan": {
+            "exports": "hogan"
+        },
         "backbone": {
             "deps": [
                 "jquery",
@@ -2120,16 +2140,13 @@ if (typeof require !== "undefined" && require.config) {
             ],
             "exports": "Backbone"
         },
+        "underscore": {
+            "exports": "_"
+        },
         "backbone-rel": {
             "deps": [
                 "backbone"
             ]
-        },
-        "underscore": {
-            "exports": "_"
-        },
-        "hogan": {
-            "exports": "hogan"
         }
     }
 });
@@ -2138,16 +2155,6 @@ else {
     var require = {
     "packages": [
         {
-            "name": "backbone",
-            "location": "jam/backbone",
-            "main": "backbone.js"
-        },
-        {
-            "name": "backbone-rel",
-            "location": "jam/backbone-rel",
-            "main": "backbone-relational.js"
-        },
-        {
             "name": "store",
             "location": "jam/store",
             "main": "store"
@@ -2158,9 +2165,24 @@ else {
             "main": "md5.js"
         },
         {
+            "name": "hogan",
+            "location": "jam/hogan",
+            "main": "hogan.js"
+        },
+        {
+            "name": "backbone",
+            "location": "jam/backbone",
+            "main": "backbone.js"
+        },
+        {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
+        },
+        {
+            "name": "jquery",
+            "location": "jam/jquery",
+            "main": "dist/jquery.js"
         },
         {
             "name": "moment",
@@ -2173,17 +2195,20 @@ else {
             "main": "cookie.js"
         },
         {
-            "name": "hogan",
-            "location": "jam/hogan",
-            "main": "hogan.js"
+            "name": "backbone-rel",
+            "location": "jam/backbone-rel",
+            "main": "backbone-relational.js"
         },
         {
-            "name": "jquery",
-            "location": "jam/jquery",
-            "main": "dist/jquery.js"
+            "name": "marked",
+            "location": "jam/marked",
+            "main": "./lib/marked.js"
         }
     ],
     "shim": {
+        "hogan": {
+            "exports": "hogan"
+        },
         "backbone": {
             "deps": [
                 "jquery",
@@ -2191,16 +2216,13 @@ else {
             ],
             "exports": "Backbone"
         },
+        "underscore": {
+            "exports": "_"
+        },
         "backbone-rel": {
             "deps": [
                 "backbone"
             ]
-        },
-        "underscore": {
-            "exports": "_"
-        },
-        "hogan": {
-            "exports": "hogan"
         }
     }
 };

@@ -1,3 +1,15 @@
+currently there is a relatively static Text object that points at
+numerous revisions. the Text object keeps title/desc and the revisions
+keep the content of the text over time. It's a hasMany relationship.
+
+I am thinkg it might be easier/better to just maintain complete Text
+objects over time; ie, a new "revision" is a new Text object with the
+same parent. But I also wonder if i should abandon storing texts in
+the database and just go full git based. what if; users needed to sign
+up via github and i used github as the datastore? it's something to
+sleep on.
+
+----
 things on the editor interface are going well. though it is slow i am very happy with how things are shaping up.
 
 i think next i want drafts support; i'm wondering how to do that. perhaps save

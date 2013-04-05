@@ -135,18 +135,23 @@
     </script> <!-- #auth -->
 
     <script type="text/mustache" id="editor">
-        <!-- <form>
-            <fieldset>
-                <input type="text" name="title" placeholder="title" /><br/>
-                <textarea name="content"></textarea><br/>
-                <button class="btn">save</button>
-            </fieldset>
-        </form> -->
-        <p class="editor" {{^text.locked}}contenteditable{{/text.locked}}>{{#text.content}} {{{text.content}}} {{/text.content}} {{^text.content}} click here to start writing. {{/text.content}} </p>
+        {{#text.locked}}
+        <p class="editor">{{{text.content}}}</p>
+        {{/text.locked}}
+
+        {{^text.locked}}
+        <!--<p class="editor" contenteditable>{{text.content}}</p>-->
+        <textarea class="editor">{{text.content}}</textarea>
+        {{/text.locked}}
     </script> <!-- /#editor -->
 
     <script type="text/mustache" id="textComments">
-        COMMENTS
+        <h4>Comments</h4>
+        <textarea name="commentText"></textarea>
+        <button>Post a Comment</button>
+        {{#text.comments}}
+            {{.}}
+        {{/text.comments}}
     </script> <!-- /#textComments -->
 
     <script type="text/mustache" id="editorPanel">

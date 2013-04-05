@@ -1,16 +1,6 @@
 var jam = {
     "packages": [
         {
-            "name": "backbone",
-            "location": "jam/backbone",
-            "main": "backbone.js"
-        },
-        {
-            "name": "backbone-rel",
-            "location": "jam/backbone-rel",
-            "main": "backbone-relational.js"
-        },
-        {
             "name": "store",
             "location": "jam/store",
             "main": "store"
@@ -21,9 +11,24 @@ var jam = {
             "main": "md5.js"
         },
         {
+            "name": "hogan",
+            "location": "jam/hogan",
+            "main": "hogan.js"
+        },
+        {
+            "name": "backbone",
+            "location": "jam/backbone",
+            "main": "backbone.js"
+        },
+        {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
+        },
+        {
+            "name": "jquery",
+            "location": "jam/jquery",
+            "main": "dist/jquery.js"
         },
         {
             "name": "moment",
@@ -36,18 +41,21 @@ var jam = {
             "main": "cookie.js"
         },
         {
-            "name": "hogan",
-            "location": "jam/hogan",
-            "main": "hogan.js"
+            "name": "backbone-rel",
+            "location": "jam/backbone-rel",
+            "main": "backbone-relational.js"
         },
         {
-            "name": "jquery",
-            "location": "jam/jquery",
-            "main": "dist/jquery.js"
+            "name": "marked",
+            "location": "jam/marked",
+            "main": "./lib/marked.js"
         }
     ],
-    "version": "0.2.13",
+    "version": "0.2.15",
     "shim": {
+        "hogan": {
+            "exports": "hogan"
+        },
         "backbone": {
             "deps": [
                 "jquery",
@@ -55,16 +63,13 @@ var jam = {
             ],
             "exports": "Backbone"
         },
+        "underscore": {
+            "exports": "_"
+        },
         "backbone-rel": {
             "deps": [
                 "backbone"
             ]
-        },
-        "underscore": {
-            "exports": "_"
-        },
-        "hogan": {
-            "exports": "hogan"
         }
     }
 };
@@ -73,16 +78,6 @@ if (typeof require !== "undefined" && require.config) {
     require.config({
     "packages": [
         {
-            "name": "backbone",
-            "location": "jam/backbone",
-            "main": "backbone.js"
-        },
-        {
-            "name": "backbone-rel",
-            "location": "jam/backbone-rel",
-            "main": "backbone-relational.js"
-        },
-        {
             "name": "store",
             "location": "jam/store",
             "main": "store"
@@ -93,9 +88,24 @@ if (typeof require !== "undefined" && require.config) {
             "main": "md5.js"
         },
         {
+            "name": "hogan",
+            "location": "jam/hogan",
+            "main": "hogan.js"
+        },
+        {
+            "name": "backbone",
+            "location": "jam/backbone",
+            "main": "backbone.js"
+        },
+        {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
+        },
+        {
+            "name": "jquery",
+            "location": "jam/jquery",
+            "main": "dist/jquery.js"
         },
         {
             "name": "moment",
@@ -108,17 +118,20 @@ if (typeof require !== "undefined" && require.config) {
             "main": "cookie.js"
         },
         {
-            "name": "hogan",
-            "location": "jam/hogan",
-            "main": "hogan.js"
+            "name": "backbone-rel",
+            "location": "jam/backbone-rel",
+            "main": "backbone-relational.js"
         },
         {
-            "name": "jquery",
-            "location": "jam/jquery",
-            "main": "dist/jquery.js"
+            "name": "marked",
+            "location": "jam/marked",
+            "main": "./lib/marked.js"
         }
     ],
     "shim": {
+        "hogan": {
+            "exports": "hogan"
+        },
         "backbone": {
             "deps": [
                 "jquery",
@@ -126,16 +139,13 @@ if (typeof require !== "undefined" && require.config) {
             ],
             "exports": "Backbone"
         },
+        "underscore": {
+            "exports": "_"
+        },
         "backbone-rel": {
             "deps": [
                 "backbone"
             ]
-        },
-        "underscore": {
-            "exports": "_"
-        },
-        "hogan": {
-            "exports": "hogan"
         }
     }
 });
@@ -144,16 +154,6 @@ else {
     var require = {
     "packages": [
         {
-            "name": "backbone",
-            "location": "jam/backbone",
-            "main": "backbone.js"
-        },
-        {
-            "name": "backbone-rel",
-            "location": "jam/backbone-rel",
-            "main": "backbone-relational.js"
-        },
-        {
             "name": "store",
             "location": "jam/store",
             "main": "store"
@@ -164,9 +164,24 @@ else {
             "main": "md5.js"
         },
         {
+            "name": "hogan",
+            "location": "jam/hogan",
+            "main": "hogan.js"
+        },
+        {
+            "name": "backbone",
+            "location": "jam/backbone",
+            "main": "backbone.js"
+        },
+        {
             "name": "underscore",
             "location": "jam/underscore",
             "main": "underscore.js"
+        },
+        {
+            "name": "jquery",
+            "location": "jam/jquery",
+            "main": "dist/jquery.js"
         },
         {
             "name": "moment",
@@ -179,17 +194,20 @@ else {
             "main": "cookie.js"
         },
         {
-            "name": "hogan",
-            "location": "jam/hogan",
-            "main": "hogan.js"
+            "name": "backbone-rel",
+            "location": "jam/backbone-rel",
+            "main": "backbone-relational.js"
         },
         {
-            "name": "jquery",
-            "location": "jam/jquery",
-            "main": "dist/jquery.js"
+            "name": "marked",
+            "location": "jam/marked",
+            "main": "./lib/marked.js"
         }
     ],
     "shim": {
+        "hogan": {
+            "exports": "hogan"
+        },
         "backbone": {
             "deps": [
                 "jquery",
@@ -197,16 +215,13 @@ else {
             ],
             "exports": "Backbone"
         },
+        "underscore": {
+            "exports": "_"
+        },
         "backbone-rel": {
             "deps": [
                 "backbone"
             ]
-        },
-        "underscore": {
-            "exports": "_"
-        },
-        "hogan": {
-            "exports": "hogan"
         }
     }
 };

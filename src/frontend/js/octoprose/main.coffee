@@ -1,16 +1,17 @@
 reqs = [
-    'jquery'
-    'underscore'
-    'backbone'
-    'md5'
-    'cookie'
-    'hogan'
-    'store'
-    'moment'
-    'backbone-rel'
+    'jquery',
+    'underscore',
+    'backbone',
+    'md5',
+    'cookie',
+    'hogan',
+    'store',
+    'moment',
+    'marked',
+    'backbone-rel',
     'js/bootstrap/bootstrap.js'
 ]
-define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
+define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
     authed = cookie.get.bind cookie, 'octoauth'
     owner = (uuid, cb) ->
         $.getJSON("owns/#{uuid}")
@@ -91,6 +92,30 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             owner uuid, (err, isOwner) ->
                 nav( if isOwner then 'edit' else 'peruse' )
         preview: (uuid) ->
+            # For now a copy of peruseText...
+            $('#leftbar, #rightbar, #center').empty()
+            $('#leftbar').hide()
+            @views.preview = {} unless @views.preview
+            text = new Text uuid:uuid
+            vs = @views.preview
+
+            (vs.panel = new EditorPanelView template:tmpl('editorPanel'), model: text).render()
+
+            (vs.readOnlyMeta = new ReadOnlyMetadataView template:tmpl('readOnlyMetadata'), model:text).render()
+
+            vs.panel.append vs.readOnlyMeta
+
+            (vs.sugNav = new SuggestionNavView template:tmpl('suggestionNav'), model: text).render()
+
+            vs.panel.append vs.sugNav
+
+            (vs.editor = new EditorView template:tmpl('editor'), model: text).render()
+
+            text.set 'locked', true
+            text.fetch()
+
+            $('#center').append(vs.editor.$el).show()
+            $('#rightbar').append(vs.panel.$el).show()
             console.log 'PREVIEWING'
         editText: (uuid) ->
             $('#leftbar, #rightbar, #center').empty()
@@ -302,16 +327,18 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment) ->
             @model.on 'change:locked', @render.bind(@)
             @model.on 'sync', @render.bind(@)
         events:
-            'input p.editor': 'editMade'
-            'click p.editor': 'selectPlaceholder'
+            'input .editor': 'editMade'
+            'click .editor': 'selectPlaceholder'
         editMade: (e) ->
-            newText = newlineToBr @$(e.target).text()
+            newText = @$(e.target).val()
             @model.set('draft', newText)
         selectPlaceholder: ->
             document.execCommand('selectAll') unless @model.get 'draft'
         render: ->
             textObject = @model.toJSON()
-            textObject.content = @model.get 'draft'
+            textObject.content = @model.get('draft') or 'click here to start writing.'
+            if @model.get('locked')
+                textObject.content = marked(textObject.content)
             context =
                 text: textObject
             html = @template.render context
