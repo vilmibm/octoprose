@@ -13,14 +13,19 @@ reqs = [
 ]
 define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
     authed = cookie.get.bind cookie, 'octoauth'
-    owner = (uuid, cb) ->
-        $.getJSON("owns/#{uuid}")
+    owner = (user, uuid, cb) ->
+        $.getJSON("/user/#{user.get('_id')}/owns/#{uuid}")
             .success((data) ->
                 cb null, data.isOwner
             )
             .error cb.bind({}, 'panic')
 
-    newlineToBr = (s) -> if s then s.replace(/\n/g, '<br/>') else s
+    canSuggest = (user, text, cb) ->
+        $.getJSON("/user/#{user.get('_id')}/cansuggest/#{text.get('uuid')}")
+            .success((data) ->
+                cb null, data.canSuggest
+            )
+            .error cb.bind({}, 'panic')
 
     tmpl = (name) -> hogan.compile $("##{name}").text()
 
@@ -84,7 +89,7 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
             unless authed()
                 return nav 'preview'
 
-            owner uuid, (err, isOwner) ->
+            owner @user, uuid, (err, isOwner) ->
                 nav( if isOwner then 'edit' else 'peruse' )
         preview: (uuid) ->
             # For now a copy of peruseText...
@@ -156,6 +161,12 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
 
             text.set 'locked', true
             text.fetch()
+
+            vs.sugOverlay = new SuggestionOverlayView editorView: vs.editor, model: text
+
+            canSuggest @user, text, (err, canSuggest) ->
+                return unless canSuggest
+                vs.sugOverlay.delegateWriteEvents()
 
             $('#center').append(vs.editor.$el).show()
             $('#rightbar').append(vs.panel.$el).show()
@@ -334,6 +345,16 @@ define reqs, ($, _, Backbone, md5, cookie, hogan, store, moment, marked) ->
                 text: @model.toJSON()
             html = @template.render context
             @$el.html html
+
+    SuggestionOverlayView = Backbone.View.extend
+        events: {}# read-only events
+        initialize: ({@editorView}) ->
+            # TODO how to pass $el/el?
+            @$el = @editorView.$el
+            @el = @editorView.el
+            # TODO listen for editor's render
+        render: ->
+            # TODO use indices to paint spans
 
     EditorView = Backbone.View.extend
         initialize: ({@template}) ->

@@ -60,12 +60,15 @@ app.get '/', (q, s) -> s.rend 'index.html'
 
 # data api
 
-app.get '/owns/:uuid', ensureAuth, (q, s) ->
+app.get '/user/:userid/owns/:uuid', ensureAuth, (q, s) ->
     Text.findOne(_user:q.user, uuid:q.params.uuid).exec (err, doc) ->
         return (new DBError err).finish(s) if err
-        return s.send {
+        return s.send
             isOwner: Boolean(doc)
-        }
+
+app.get '/user/:userid/cansuggest/:uuid', ensureAuth, (q, s) ->
+    # TODO check permissions
+    s.send canSuggest: true
 
 app.get '/user/:id/texts', (q, s) ->
     return s.send [] unless q.isAuthenticated()
