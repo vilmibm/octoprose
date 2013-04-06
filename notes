@@ -1,3 +1,27 @@
+"reviewer" vs "author"
+
+## old model:
+ranges are individual; once one exists later reviewers can
+just add further suggestions to it.
+
+## possible model 0:
+reviewers only ever see their own comments; never the comments of
+others. each suggestion has a comment thread exclusively between the
+reviewer and the author.
+
+when author views the piece, they see a listing of all users who have
+commented (sidebar widget). each one gets a SuggestionOverlayView. the
+author can toggle on/off each individual author.
+
+until a suggestion is cleared by the author its highlight persists for
+each revision. it remains as a grayed out line on the revision within
+which it was cleared.
+
+there is no "points" system whatsoever. there are no in-place
+suggestions. just highlight and note: exactly like pen on paper.
+
+----
+
 currently there is a relatively static Text object that points at
 numerous revisions. the Text object keeps title/desc and the revisions
 keep the content of the text over time. It's a hasMany relationship.
