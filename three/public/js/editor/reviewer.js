@@ -7,9 +7,9 @@ var mkspan = function(c, ix) {
 }
 
 var rawText = $("#text").text();
-var mdHtml = m2h(rawText);
+var mdHTML = m2h(rawText);
 
-//var $mdContainer = $("<div />").html(mdHtml);
+//var $mdContainer = $("<div />").html(mdHTML);
 
 var INEL  = 1;
 var INTXT = 2;
@@ -17,34 +17,48 @@ var INENT = 3;
 var c     = 0;
 var state, ch;
 
-var newMdHtml = '';
+var newMdHTML = '';
 
 
-for (var ix = 0; ix < mdHtml.length; ix++) {
+for (var ix = 0; ix < mdHTML.length; ix++) {
     // TODO entities
-    ch = mdHtml[ix];
+    ch = mdHTML[ix];
     if (ch == '<') {
-        console.log("START EL");
         state = INEL;
-        newMdHtml += ch;
+        newMdHTML += ch;
         continue;
     }
     if (ch == '>' && state == INEL) {
-        console.log("END EL");
         state = INTXT;
-        newMdHtml += ch;
+        newMdHTML += ch;
+        continue;
+    }
+    if (ch == '&' && state == INTXT) {
+        state = INENT;
+        newMdHTML += '<span data-idx="' + c++ + '">';
+        newMdHTML += ch
+        continue;
+    }
+    if (ch == ';' && state == INENT) {
+        newMdHTML += ch;
+        newMdHTML += '</span>';
+        state = INTXT;
         continue;
     }
     if (state == INEL) {
         console.log(ch);
-        newMdHtml += ch;
+        newMdHTML += ch;
+    }
+    if (state == INENT) {
+        console.log(ch);
+        newMdHTML += ch;
     }
     if (state == INTXT) {
-        newMdHtml += mkspan(ch, c++);
+        newMdHTML += mkspan(ch, c++);
     }
 }
 
-$root.text(newMdHtml);
+$root.text(newMdHTML);
 
 
 
