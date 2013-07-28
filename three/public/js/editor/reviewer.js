@@ -1,7 +1,9 @@
 // preamble
-var m2h = markdown.toHTML;
+var m2h = markdown.toHTML.bind(markdown);
+var $id = document.getElementById.bind(document);
 
 var $root = $("#textContainer");
+var root  = $id("textContainer");
 
 // create selectable text
 // TODO this could be done server side.
@@ -42,7 +44,7 @@ for (var cix = 0; cix < mdHTML.length; cix++) {
     newMdHTML += ch;
 }
 
-$root.html(newMdHTML);
+root.innerHTML = newMdHTML;
 
 // selecting
 var Suggestions = function() {
@@ -87,7 +89,7 @@ var mouseUpHandler = function(e) {
 
     sel.collapseToStart(); // clear selection
 
-    // TODO ask for suggestion
+    // TODO ask for suggestion with modal
     var suggestionText = "The palatable comb " + String(Math.floor(100*Math.random()));
 
     if (!suggestionText) {
@@ -110,8 +112,7 @@ var newSuggestionHandler = function(suggestion) {
     var RIDX = Math.max.apply(Math, rangeTuple);
 
     for (var idx = LIDX; idx <= RIDX; idx++) {
-        console.log(idx);
-        $('span[data-idx="'+idx+'"]').css('backgroundColor', 'red');
+        root.querySelector('span[data-idx="'+idx+'"]').style.backgroundColor = 'red';
     }
 };
 
