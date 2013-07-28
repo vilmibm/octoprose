@@ -1,13 +1,16 @@
+// preamble
 var m2h = markdown.toHTML;
 
 var $root = $("#textContainer");
 
+// create selectable text
+// TODO this could be done server side.
 var rawText = $("#text").text();
 var mdHTML = m2h(rawText);
 
 var INEL  = 1;
 var INTXT = 2;
-var INENT = 3; 
+var INENT = 3;
 var idx   = 0; // span index
 var state;
 var ch, cix; // character, character index
