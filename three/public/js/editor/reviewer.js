@@ -125,24 +125,73 @@ var mouseUpHandler = function(e) {
 
 $root.on('mouseup', mouseUpHandler);
 
+var RGBA = function(r, g, b, a) {
+    this.r = r || 0;
+    this.g = g || 0;
+    this.b = b || 0;
+    this.a = a || 1;
+};
+
+RGBA.prototype.toString = function() {
+    return 'rgba('+this.r+','+this.g+','+this.b+','+this.a+')';
+};
+
+RGBA.prototype.clone = function() {
+    return new RGBA(this.r, this.g, this.b, this.a);
+};
+
+var baseBgColor = new RGBA(255, 0, 0, .1);
+
+var opaquen = function(bgColor) {
+    var newRGBA = bgColor.clone();
+    newRGBA.a = newRGBA.a + .1;
+    return newRGBA;
+};
+
+var RGBAFromString = function(string) {
+    var commaSep = string
+        .replace('rgba(', '')
+        .replace(')', '')
+        .split(',');
+    var toNumber = function(str) {
+        return Number(str.replace(/ /g, ''));
+    };
+    var r = toNumber(commaSep[0]);
+    var g = toNumber(commaSep[1]);
+    var b = toNumber(commaSep[2]);
+    var a = toNumber(commaSep[3]);
+
+    return new RGBA(r, g, b, a);
+};
+
 var newSuggestionHandler = function(suggestion) {
+    console.log("HI");
     var rangeTuple = suggestion.range;
 
     console.log("New range:", rangeTuple);
 
-    var LIDX = Math.min.apply(Math, rangeTuple);
-    var RIDX = Math.max.apply(Math, rangeTuple);
+    var lidx = Math.min.apply(Math, rangeTuple);
+    var ridx = Math.max.apply(Math, rangeTuple);
 
-    for (var idx = LIDX; idx <= RIDX; idx++) {
-        root.querySelector('span[data-idx="'+idx+'"]').style.backgroundColor = 'red';
+    var span, bgColor;
+
+    for (var idx = lidx; idx <= ridx; idx++) {
+        span = root.querySelector('span[data-idx="'+idx+'"]');
+        console.log(span);
+        if (span.style.backgroundColor.length === 0) {
+            bgColor = baseBgColor;
+        }
+        else {
+            bgColor = opaquen(RGBAFromString(span.style.backgroundColor));
+        }
+        console.log(bgColor);
+        span.style.backgroundColor = bgColor.toString();
     }
 };
 
 suggestions.on('push', newSuggestionHandler);
 
-//window.onbeforeunload = suggestions.save.bind(suggestions);
 window.onunload = suggestions.save.bind(suggestions);
 
 // Suggestion restore
-
 suggestions.fetch();
