@@ -47,11 +47,37 @@ for (var cix = 0; cix < mdHTML.length; cix++) {
 root.innerHTML = newMdHTML;
 
 // selecting
+var Suggestion = function(data) {
+    this.text     = data.text;
+    this.range    = data.range.sort(function(a, b) { return a - b });
+    this.selected = data.selected;
+    this.comments = data.comments || [];
+};
+
 var Suggestions = function() {
     this._suggestions = [];
     this._callbacks = {
         push:  []
     };
+};
+
+Suggestions.prototype.findByIdx = function(idx) {
+    var matches = [];
+    for (var i = 0; i < this._suggestions.length; i++) {
+        var suggestion = this._suggestions[i];
+        var range = suggestion.range;
+        if (idx >= range[0] && idx <= range[1]) {
+            matches.push(suggestion);
+        }
+    }
+
+    var sortedMatches = matches.sort(function(a, b) {
+        return a.range[1] - a.range[0] - b.range[1] - b.range[0];
+    });
+
+    console.log("FoundByIdx:", sortedMatches);
+
+    return sortedMatches;
 };
 
 Suggestions.prototype.fetch = function() {
@@ -119,8 +145,9 @@ var mouseUpHandler = function(e) {
         return;
     }
 
-    suggestions.push({text:  suggestionText,
-                      range: [anchorIdx, focusIdx]});
+    suggestions.push(new Suggestion({text:     suggestionText,
+                                     selected: selectedText,
+                                     range:    [anchorIdx, focusIdx]}));
 };
 
 $root.on('mouseup', mouseUpHandler);
@@ -165,28 +192,30 @@ var RGBAFromString = function(string) {
 };
 
 var newSuggestionHandler = function(suggestion) {
-    console.log("HI");
     var rangeTuple = suggestion.range;
 
     console.log("New range:", rangeTuple);
 
-    var lidx = Math.min.apply(Math, rangeTuple);
-    var ridx = Math.max.apply(Math, rangeTuple);
+    var lidx = rangeTuple[0];
+    var ridx = rangeTuple[1];
 
     var span, bgColor;
 
     for (var idx = lidx; idx <= ridx; idx++) {
         span = root.querySelector('span[data-idx="'+idx+'"]');
-        console.log(span);
         if (span.style.backgroundColor.length === 0) {
             bgColor = baseBgColor;
         }
         else {
             bgColor = opaquen(RGBAFromString(span.style.backgroundColor));
         }
-        console.log(bgColor);
+
         span.style.backgroundColor = bgColor.toString();
+
+        $(span).addClass('highlight');
     }
+
+    return true;
 };
 
 suggestions.on('push', newSuggestionHandler);
@@ -195,3 +224,32 @@ window.onunload = suggestions.save.bind(suggestions);
 
 // Suggestion restore
 suggestions.fetch();
+
+// Add comment to existing suggestion
+
+var suggestionClickHandler = function(e) {
+    var span = e.target;
+    if ( ! $(span).hasClass('highlight') ) {
+        console.log("Click not on a suggestion");
+        return true;
+    }
+
+    // TODO ask for comment
+    var commentText = "Science and Magic " + String(Math.floor(100*Math.random()));
+
+    if (commentText.length === 0) {
+        console.log("No comment entered, moving on");
+        return;
+    }
+
+    var idx = Number(span.dataset.idx);
+    var suggestion = suggestions.findByIdx(idx).pop();
+
+    console.log("Adding comment to:", suggestion);
+
+    suggestion.comments.push({text:commentText});
+
+    return true;
+};
+
+$root.on('click', 'span.highlight', suggestionClickHandler);
