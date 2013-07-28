@@ -50,8 +50,23 @@ root.innerHTML = newMdHTML;
 var Suggestions = function() {
     this._suggestions = [];
     this._callbacks = {
-        push: []
+        push:  []
     };
+};
+
+Suggestions.prototype.fetch = function() {
+    var oldSuggestions = JSON.parse(window.localStorage.getItem('suggestions'));
+    if (oldSuggestions.length > 0) {
+        this.reset(oldSuggestions);
+    }
+};
+
+Suggestions.prototype.reset = function(suggestions) {
+    this._suggestions = suggestions;
+    for (var i = 0; i < this._suggestions.length; i++) {
+        this._emit('push', this._suggestions[i]);
+    }
+    return this;
 };
 
 Suggestions.prototype.on = function(e, callback) {
@@ -59,7 +74,7 @@ Suggestions.prototype.on = function(e, callback) {
     return this;
 }
 
-Suggestions.prototype.emit = function(e, data) {
+Suggestions.prototype._emit = function(e, data) {
     for (var i = 0; i < this._callbacks[e].length; i++) {
         this._callbacks[e][i].call(this, data);
     }
@@ -68,7 +83,14 @@ Suggestions.prototype.emit = function(e, data) {
 
 Suggestions.prototype.push = function(suggestion) {
     this._suggestions.push(suggestion);
-    this.emit('push', suggestion);
+    this._emit('push', suggestion);
+    return this;
+};
+
+Suggestions.prototype.save = function() {
+    console.log("Saving suggestions");
+    // TODO go to a backend
+    window.localStorage.setItem('suggestions', JSON.stringify(this._suggestions));
     return this;
 };
 
@@ -117,3 +139,10 @@ var newSuggestionHandler = function(suggestion) {
 };
 
 suggestions.on('push', newSuggestionHandler);
+
+//window.onbeforeunload = suggestions.save.bind(suggestions);
+window.onunload = suggestions.save.bind(suggestions);
+
+// Suggestion restore
+
+suggestions.fetch();
