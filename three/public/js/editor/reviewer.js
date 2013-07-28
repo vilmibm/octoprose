@@ -2,63 +2,44 @@ var m2h = markdown.toHTML;
 
 var $root = $("#textContainer");
 
-var mkspan = function(c, ix) {
-    return '<span data-idx="'+ix+'">'+c+'</span>';
-}
-
 var rawText = $("#text").text();
 var mdHTML = m2h(rawText);
-
-//var $mdContainer = $("<div />").html(mdHTML);
 
 var INEL  = 1;
 var INTXT = 2;
 var INENT = 3; 
-var c     = 0;
-var state, ch;
+var idx   = 0; // span index
+var state;
+var ch, cix; // character, character index
 
 var newMdHTML = '';
 
-
-for (var ix = 0; ix < mdHTML.length; ix++) {
-    // TODO entities
-    ch = mdHTML[ix];
+for (var cix = 0; cix < mdHTML.length; cix++) {
+    ch = mdHTML[cix];
     if (ch == '<') {
         state = INEL;
-        newMdHTML += ch;
-        continue;
     }
-    if (ch == '>' && state == INEL) {
+    else if (ch == '>' && state == INEL) {
         state = INTXT;
-        newMdHTML += ch;
-        continue;
     }
-    if (ch == '&' && state == INTXT) {
+    else if (ch == '&' && state == INTXT) {
         state = INENT;
-        newMdHTML += '<span data-idx="' + c++ + '">';
-        newMdHTML += ch
-        continue;
+        newMdHTML += '<span data-idx="' + idx++ + '">';
     }
-    if (ch == ';' && state == INENT) {
+    else if (ch == ';' && state == INENT) {
         newMdHTML += ch;
         newMdHTML += '</span>';
         state = INTXT;
         continue;
     }
-    if (state == INEL) {
-        console.log(ch);
-        newMdHTML += ch;
+    else if (state == INTXT) {
+        newMdHTML += '<span data-idx="'+ idx++ +'">'+ch+'</span>';
+        continue;
     }
-    if (state == INENT) {
-        console.log(ch);
-        newMdHTML += ch;
-    }
-    if (state == INTXT) {
-        newMdHTML += mkspan(ch, c++);
-    }
+    newMdHTML += ch;
 }
 
-$root.text(newMdHTML);
+$root.html(newMdHTML);
 
 
 
