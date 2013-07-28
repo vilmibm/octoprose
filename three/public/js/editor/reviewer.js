@@ -45,32 +45,32 @@ for (var cix = 0; cix < mdHTML.length; cix++) {
 $root.html(newMdHTML);
 
 // selecting
-var Ranges = function() {
-    this._ranges = [];
+var Suggestions = function() {
+    this._suggestions = [];
     this._callbacks = {
         push: []
     };
 };
 
-Ranges.prototype.on = function(e, callback) {
+Suggestions.prototype.on = function(e, callback) {
     this._callbacks[e].push(callback);
     return this;
 }
 
-Ranges.prototype.emit = function(e, data) {
+Suggestions.prototype.emit = function(e, data) {
     for (var i = 0; i < this._callbacks[e].length; i++) {
         this._callbacks[e][i].call(this, data);
     }
     return this;
 };
 
-Ranges.prototype.push = function(rangeTuple) {
-    this._ranges.push(rangeTuple);
-    this.emit('push', rangeTuple);
+Suggestions.prototype.push = function(suggestion) {
+    this._suggestions.push(suggestion);
+    this.emit('push', suggestion);
     return this;
 };
 
-var ranges = new Ranges;
+var suggestions = new Suggestions;
 var sel = window.getSelection(); // this function returns a singleton reference.
 
 var mouseUpHandler = function(e) {
@@ -85,24 +85,34 @@ var mouseUpHandler = function(e) {
     var anchorIdx = Number(sel.anchorNode.parentElement.dataset['idx']);
     var focusIdx  = Number(sel.focusNode.parentElement.dataset['idx' ]);
 
-    ranges.push([anchorIdx, focusIdx]);
-
     sel.collapseToStart(); // clear selection
+
+    // TODO ask for suggestion
+    var suggestionText = "The palatable comb " + String(Math.floor(100*Math.random()));
+
+    if (!suggestionText) {
+        console.log("No suggestion. Moving on");
+        return;
+    }
+
+    suggestions.push({text:  suggestionText,
+                      range: [anchorIdx, focusIdx]});
 };
 
 $root.on('mouseup', mouseUpHandler);
 
-var newRangeHandler = function(rangeTuple) {
+var newSuggestionHandler = function(suggestion) {
+    var rangeTuple = suggestion.range;
+
     console.log("New range:", rangeTuple);
+
     var LIDX = Math.min.apply(Math, rangeTuple);
     var RIDX = Math.max.apply(Math, rangeTuple);
 
     for (var idx = LIDX; idx <= RIDX; idx++) {
         console.log(idx);
         $('span[data-idx="'+idx+'"]').css('backgroundColor', 'red');
-        // ask for new comment
-        // if comment is made, add to comments collection
     }
 };
 
-ranges.on('push', newRangeHandler);
+suggestions.on('push', newSuggestionHandler);
