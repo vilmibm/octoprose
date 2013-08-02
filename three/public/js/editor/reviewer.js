@@ -253,3 +253,5 @@ var suggestionClickHandler = function(e) {
 };
 
 $root.on('click', 'span.highlight', suggestionClickHandler);
+
+
