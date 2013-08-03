@@ -4,13 +4,13 @@
         <meta charset="UTF-8">
     </head>
     <body>
-        <button id="openEditor">Edit</button>
-        <div id="editorContainer" style="display:none">
-            <textarea></textarea>
-            <div>
-                <button id="updatePreview">Update Preview</button>
+        <div id="editorContainer">
+            <button id="openEditor">Show Editor</button>
+            <textarea style="display:none"></textarea>
+            <div class="controls" style="display:none">
+                <button id="updateDraft">Update Draft</button>
                 <button id="saveRevision">Save Revision</button>
-                <button id="closeEditor">Close Editor</button>
+                <button id="hideEditor">Hide Editor</button>
             </div>
         </div>
         <div id="textContainer"></div>
@@ -443,7 +443,10 @@ Eldon looked up in time to see the unmistakable shape of an official drone soar 
         </div>
         <script src="zepto.min.js"></script>
         <script src="markdown.js"></script>
-        <script src="reviewer.js"></script>
-        <script src="editor.js"></script>
+        <script src="common.js"></script>
+        <script src="collections.js"></script>
+        <script src="views.js"></script>
+        <script src="models.js"></script>
+        <script src="main.js"></script>
     </body>
 </html>
