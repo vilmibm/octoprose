@@ -27,7 +27,7 @@ scope(function() {
 
     Suggestions.prototype.fetch = function() {
         var oldSuggestions = JSON.parse(window.localStorage.getItem('suggestions'));
-        if (oldSuggestions.length > 0) {
+        if (oldSuggestions && oldSuggestions.length > 0) {
             this.reset(oldSuggestions);
         }
     };
