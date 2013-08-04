@@ -1,4 +1,4 @@
-ensure(EventEmitter);
+ensure('EventEmitter');
 
 var Suggestions;
 scope(function() {

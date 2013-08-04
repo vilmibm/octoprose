@@ -1,7 +1,7 @@
-ensure($,
-       Reviewer,
-       Editor,
-       Text);
+ ensure('$',
+        'Reviewer',
+        'Editor',
+        'Piece');
 
 var rawText = $("#text").text();
 

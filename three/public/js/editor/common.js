@@ -2,8 +2,9 @@ var DEBUG = true;
 
 var ensure = function() {
     for (var x = 0; x < arguments.length; x++) {
-        if (!x) {
-            throw "Missing requirement.";
+        var requirement = arguments[x];
+        if (!window[requirement]) {
+            throw "Missing requirement:" + requirement;
         }
     }
 };

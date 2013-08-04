@@ -1,4 +1,4 @@
-ensure($);
+ensure('$');
 
 var Reviewer;
 scope(function () {

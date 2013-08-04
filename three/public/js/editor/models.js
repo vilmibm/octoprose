@@ -1,4 +1,6 @@
-ensure(EventEmitter, Suggestions, markdown);
+ensure('EventEmitter',
+       'Suggestions',
+       'markdown');
 
 var Text;
 scope(function() {
