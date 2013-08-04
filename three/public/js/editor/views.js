@@ -59,7 +59,7 @@ scope(function () {
 
         window.addEventListener(   'resize',  resizeHeight.bind(null, this.root));
         this.root.addEventListener('mouseup', this.handleHighlight.bind(this));
-        $(this.root).on(           'click',   'span.highlight', this.handleSuggestionClick(this));
+        $(this.root).on(           'click',   'span.highlight', this.handleSuggestionClick.bind(this));
         this.piece.suggestions.on(  'push',    this.handleSuggestion.bind(this));
         this.piece.on(              'update',  this.render.bind(this));
 
@@ -86,7 +86,7 @@ scope(function () {
         }
 
         var idx = Number(span.dataset.idx);
-        var suggestion = suggestions.findByIdx(idx).pop();
+        var suggestion = this.piece.suggestions.findByIdx(idx).pop();
 
         log("Adding comment to:", suggestion);
 
@@ -197,8 +197,8 @@ scope(function() {
 
         window.addEventListener('resize',  resizeHeight.bind(null, this.root));
 
-        this.$root.on('click', 'button#showEditor', this.showEditor.bind(this));
-        this.$root.on('click', 'button#hideEditor', this.hideEditor.bind(this));
+        this.root.querySelector('#showEditor').addEventListener('click', this.showEditor.bind(this));
+        this.root.querySelector('#hideEditor').addEventListener('click', this.hideEditor.bind(this));
     };
 
     Editor.prototype.showEditor = function() {
@@ -217,7 +217,7 @@ scope(function() {
 
     Editor.prototype.hideEditor = function() {
         var showButton = this.$root.find('button#showEditor')[0];
-        editButton.style.display = "block";
+        showButton.style.display = "block";
 
         var controls = this.$root.find('.controls')[0];
         controls.style.display = "none";
