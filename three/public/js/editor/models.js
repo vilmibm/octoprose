@@ -14,7 +14,7 @@ scope(function() {
         this.emit('update', this);
         return this;
     };
-    
+
     Piece.prototype.getRawText = function() {
         return this.text;
     };
@@ -33,5 +33,3 @@ scope(function() {
         this.comments = data.comments || [];
     };
 });
-
-
