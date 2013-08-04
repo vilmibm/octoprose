@@ -43,5 +43,5 @@ var resizeHeight = function(el, ratio) {
     ratio = ratio || .5;
     var elementHeight = window.innerHeight * ratio;
     log("Setting", el, "height to", elementHeight);
-    el.style.height = String(editorHeight) + "px";
+    el.style.height = String(elementHeight) + "px";
 };

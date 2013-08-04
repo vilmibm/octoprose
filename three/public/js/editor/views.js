@@ -106,7 +106,7 @@ scope(function () {
         var span, bgColor;
 
         for (var idx = lidx; idx <= ridx; idx++) {
-            span = root.querySelector('span[data-idx="'+idx+'"]');
+            span = this.root.querySelector('span[data-idx="'+idx+'"]');
             if (span.style.backgroundColor.length === 0) {
                 bgColor = BASEBGCOLOR;
             }
