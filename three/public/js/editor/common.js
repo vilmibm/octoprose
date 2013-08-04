@@ -9,6 +9,10 @@ var ensure = function() {
     }
 };
 
+var slice = function(a, x, y) {
+    return Array.prototype.slice.call(a, x, y);
+};
+
 var log = function() {
     if (DEBUG) {
         return console.log.apply(console, arguments);
@@ -22,11 +26,11 @@ var error = function() {
 };
 
 var scope = function(fn) {
-    return fn.apply(this, arguments.slice(1));
+    return fn.apply(this, slice(arguments, 1));
 };
 
 var inherits = function(to, from) {
-    var methods = arguments.slice(2);
+    var methods = slice(arguments, 2);
     for (var x = 0; x < methods.length; x++) {
         to.prototype[methods[x]] = from.prototype[methods[x]];
     }
