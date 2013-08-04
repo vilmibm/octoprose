@@ -50,9 +50,9 @@ scope(function () {
     // Used for red highlight
     var BASEBGCOLOR = new RGBA(255, 0, 0, .1);
 
-    Reviewer = function(root, text) {
+    Reviewer = function(root, piece) {
         this.root = root;
-        this.text = text;
+        this.piece = piece;
 
         this.root.style.overflow = "scroll";
         resizeHeight(this.root);
@@ -60,13 +60,13 @@ scope(function () {
         window.addEventListener(   'resize',  resizeHeight.bind(null, this.root));
         this.root.addEventListener('mouseup', this.handleHighlight.bind(this));
         $(this.root).on(           'click',   'span.highlight', this.handleSuggestionClick(this));
-        this.text.suggestions.on(  'push',    this.handleSuggestion.bind(this));
-        this.text.on(              'update',  this.render.bind(this));
+        this.piece.suggestions.on(  'push',    this.handleSuggestion.bind(this));
+        this.piece.on(              'update',  this.render.bind(this));
 
     };
 
     Reviewer.prototype.render = function() {
-        this.root.innerHTML = this.spanify(this.text.getMarkdownText());
+        this.root.innerHTML = this.spanify(this.piece.getMarkdownText());
         return this.root;
     };
 
@@ -144,7 +144,7 @@ scope(function () {
             return;
         }
 
-        this.text.suggestions.push(
+        this.piece.suggestions.push(
             new Suggestion({text:     suggestionText,
                             selected: selectedText,
                             range:    [anchorIdx, focusIdx]}));
@@ -188,10 +188,10 @@ scope(function () {
 
 var Editor;
 scope(function() {
-    Editor = function(root, text) {
+    Editor = function(root, piece) {
         this.root  = root;
         this.$root = $(root);
-        this.text  = text;
+        this.piece  = piece;
 
         resizeHeight(this.root);
 
@@ -203,7 +203,7 @@ scope(function() {
 
     Editor.prototype.showEditor = function() {
         var ta = this.$root.find('textarea')[0];
-        ta.value = text.getRawText();
+        ta.value = piece.getRawText();
         ta.style.width = "100%";
         ta.style.height = "90%";
         ta.style.display = "block";

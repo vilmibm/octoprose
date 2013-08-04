@@ -2,24 +2,24 @@ ensure('EventEmitter',
        'Suggestions',
        'markdown');
 
-var Text;
+var Piece;
 scope(function() {
-    Text = inherits(function(text, suggestions) {
+    Piece = inherits(function(text, suggestions) {
         this.text = text || "";
         this.suggestions = suggestions || new Suggestions;
     }, EventEmitter, 'on', 'emit');
-    
-    Text.prototype.setText = function(newText) {
-        this.text = newText;
+
+    Piece.prototype.setPiece = function(newPiece) {
+        this.text = newPiece;
         this.emit('update', this);
         return this;
     };
     
-    Text.prototype.getRawText = function() {
+    Piece.prototype.getRawText = function() {
         return this.text;
     };
 
-    Text.prototype.getMarkdownText = function() {
+    Piece.prototype.getMarkdownText = function() {
         return markdown.toHTML(this.text);
     };
 });

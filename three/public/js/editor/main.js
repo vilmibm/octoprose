@@ -3,12 +3,13 @@
         'Editor',
         'Piece');
 
-var rawText = $("#text").text();
+var rawPiece = $('#text').text();
 
-var text     = new Text(    rawText);
-var reviewer = new Reviewer(document.getElementById("reviewerContainer"), text);
-var editor   = new Editor(  document.getElementById("editorContainer"), text);
+var piece = new Piece(      rawPiece);
+var reviewer = new Reviewer(document.getElementById('reviewerContainer'), piece);
+var editor   = new Editor(  document.getElementById('editorContainer'), piece);
 
-rawText.suggestions.fetch();
+piece.suggestions.fetch();
+reviewer.render();
 
-window.addEventListener('unload', text.suggestions.save.bind(text.suggestions));
+window.addEventListener('unload', piece.suggestions.save.bind(piece.suggestions));
