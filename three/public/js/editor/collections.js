@@ -2,9 +2,9 @@ ensure('EventEmitter');
 
 var Suggestions;
 scope(function() {
-    Suggestions = inherits(function() {
+    Suggestions = mixin(function() {
         this._suggestions = [];
-    }, EventEmitter, 'on', 'emit');
+    }, [EventEmitter, 'on', 'emit']);
 
     Suggestions.prototype.findByIdx = function(idx) {
         var matches = [];

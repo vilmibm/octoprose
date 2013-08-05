@@ -1,5 +1,20 @@
 ensure('$');
 
+var Resizable;
+scope(function() {
+    Resizable = function() {};
+    Resizable.prototype.resize = function(ratio) {
+        if (!ratio) {
+            throw "Ratio required";
+        }
+        var newHeight = String(ratio * window.innerHeight) + "px";
+        log("Setting", this.root, "height to", newHeight);
+        this.root.style.height = newHeight;
+
+        return this;
+    };
+});
+
 var Reviewer;
 scope(function () {
     var selection = window.getSelection(); // this function returns a singleton reference
@@ -50,20 +65,18 @@ scope(function () {
     // Used for red highlight
     var BASEBGCOLOR = new RGBA(255, 0, 0, .1);
 
-    Reviewer = function(root, piece) {
+    Reviewer = mixin(function(root, piece) {
         this.root = root;
         this.piece = piece;
 
         this.root.style.overflow = "scroll";
-        resizeHeight(this.root);
 
-        window.addEventListener(   'resize',  resizeHeight.bind(null, this.root));
         this.root.addEventListener('mouseup', this.handleHighlight.bind(this));
         $(this.root).on(           'click',   'span.highlight', this.handleSuggestionClick.bind(this));
         this.piece.suggestions.on(  'push',    this.handleSuggestion.bind(this));
         this.piece.on(              'update',  this.render.bind(this));
 
-    };
+    }, [EventEmitter, 'on', 'emit'], [Resizable, 'resize']);
 
     Reviewer.prototype.render = function() {
         this.root.innerHTML = this.spanify(this.piece.getMarkdownText());
@@ -188,20 +201,19 @@ scope(function () {
 
 var Editor;
 scope(function() {
-    Editor = function(root, piece) {
+    Editor = mixin(function(root, piece) {
         this.root  = root;
         this.$root = $(root);
         this.piece  = piece;
 
-        resizeHeight(this.root);
-
-        window.addEventListener('resize',  resizeHeight.bind(null, this.root));
+        this.hidden = true;
 
         this.root.querySelector('#showEditor').addEventListener('click', this.showEditor.bind(this));
         this.root.querySelector('#hideEditor').addEventListener('click', this.hideEditor.bind(this));
-    };
+    }, [EventEmitter, 'on', 'emit'], [Resizable, 'resize']);
 
     Editor.prototype.showEditor = function() {
+        this.hidden = false;
         var ta = this.$root.find('textarea')[0];
         ta.value = piece.getRawText();
         ta.style.width = "100%";
@@ -213,9 +225,12 @@ scope(function() {
 
         var showButton = this.$root.find('button#showEditor')[0];
         showButton.style.display = "none";
+        this.emit('show');
     };
 
     Editor.prototype.hideEditor = function() {
+        this.emit('hide');
+        this.hidden = true;
         var showButton = this.$root.find('button#showEditor')[0];
         showButton.style.display = "block";
 

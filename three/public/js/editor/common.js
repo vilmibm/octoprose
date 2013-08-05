@@ -29,19 +29,17 @@ var scope = function(fn) {
     return fn.apply(this, slice(arguments, 1));
 };
 
-var inherits = function(to, from) {
-    var methods = slice(arguments, 2);
-    for (var x = 0; x < methods.length; x++) {
-        to.prototype[methods[x]] = from.prototype[methods[x]];
-    }
-    return to;
-};
+var mixin = function(to) {
+    var froms = slice(arguments, 1);
+    var from, methods;
 
-var resizeHeight = function(el, ratio) {
-    // Given a DOM element and a ratio, resize the height of the
-    // element using that ratio of the window height.
-    ratio = ratio || .5;
-    var elementHeight = window.innerHeight * ratio;
-    log("Setting", el, "height to", elementHeight);
-    el.style.height = String(elementHeight) + "px";
+    for (var x = 0; x < froms.length; x++) {
+        from    = froms[x][0];
+        methods = froms[x].slice(1);
+        for (var y = 0; y < methods.length; y++) {
+            to.prototype[methods[y]] = from.prototype[methods[y]];
+        }
+    }
+
+    return to;
 };

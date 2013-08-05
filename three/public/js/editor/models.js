@@ -4,10 +4,11 @@ ensure('EventEmitter',
 
 var Piece;
 scope(function() {
-    Piece = inherits(function(text, suggestions) {
+    Piece = mixin(function(text, suggestions) {
         this.text = text || "";
         this.suggestions = suggestions || new Suggestions;
-    }, EventEmitter, 'on', 'emit');
+    }, [EventEmitter, 'on', 'emit']);
+
 
     Piece.prototype.setPiece = function(newPiece) {
         this.text = newPiece;
